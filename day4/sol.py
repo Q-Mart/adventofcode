@@ -6,7 +6,7 @@ answer = 0
 m = hashlib.md5(key + str(answer))
 md5String = m.hexdigest()
 
-while md5String[0:5] != '00000':
+while md5String[0:6] != '000000':
     answer += 1
     m = hashlib.md5(key + str(answer))
     md5String = m.hexdigest()
