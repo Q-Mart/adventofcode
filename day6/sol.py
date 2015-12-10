@@ -1,8 +1,8 @@
-numberLightsOn = 0
+totalBrightness = 0
 grid = []
-
-for y in xrange(1000):
+for i in xrange(1000):
     grid.append([0]*1000)
+
 
 class instruction():
     def __init__(self, type, x1, y1, x2, y2):
@@ -43,13 +43,14 @@ for i in xrange(len(input)):
 for instruction in input:
     for x in xrange(instruction.start_coords[0], instruction.end_coords[0] + 1):
         for y in xrange(instruction.start_coords[1], instruction.end_coords[1] + 1):
-            if instruction.type == 'turnon': grid[x][y] = 1
-            elif instruction.type == 'turnoff': grid[x][y] = 0
-            else: grid[x][y] = not grid[x][y]
+            if instruction.type == 'turnon': grid[x][y] += 1
+            elif instruction.type == 'turnoff':
+                if grid[x][y] > 0: grid[x][y] -= 1
+            else: grid[x][y] += 2
 
 #check for lights that are on
 for row in grid:
     for light in row:
-        if light: numberLightsOn += 1
+        totalBrightness += light
 
-print numberLightsOn, 'lights are on'
+print totalBrightness, 'is the total brightness'
