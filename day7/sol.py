@@ -56,4 +56,14 @@ for i in xrange(len(input)):
 for instruction in input:
     parse(instruction)
 
+#part 2
+newB = evaluate('a')
+wires['b'] = newB
+
+for instruction in input:
+    if instruction[1] == 'b':
+        continue
+    else:
+        parse(instruction)
+
 print evaluate('a')
