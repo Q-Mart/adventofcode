@@ -1,0 +1,38 @@
+import itertools
+
+#(person1, person2): happiness gained by person 1
+happinessOf = dict()
+listOfTotalHappiness = []
+people = set()
+
+def calcHappiness(arrangement):
+    happiness = 0
+    for i in xrange(len(arrangement)):
+        happiness += happinessOf[(arrangement[i], arrangement[(i+1) % len(arrangement)])]
+
+
+with open('input') as f:
+    input = f.readlines()
+    input = map(str.strip, input)
+    input = map(str.split, input)
+
+#turn input into dictionairy
+for line in input:
+    person1 = line[0]
+    person2 = line[len(line) - 1].strip('.')
+    happiness = int(line[3])
+
+    people.add(person1)
+    people.add(person2)
+
+    if 'gain' in line: happinessOf[(person1, person2)] = happiness
+    else: happinessOf[(person1, person2)] = -happiness
+
+#loop through every permutation
+for arrangement in itertools.permutations(list(people)):
+    totalHappiness = 0
+    print arrangement.reverse()
+
+    listOfTotalHappiness.append(totalHappiness)
+
+print max(listOfTotalHappiness)
