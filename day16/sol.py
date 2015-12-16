@@ -66,18 +66,18 @@ for key, aunty in sues.iteritems():
 
     #match against our sample
     if aunty.children == match.children: matches += 1
-    if aunty.cats == match.cats: matches += 1
+    if aunty.cats > match.cats: matches += 1
     if aunty.samoyeds == match.samoyeds: matches += 1
-    if aunty.pomeranians == match.pomeranians: matches += 1
+    if aunty.pomeranians < match.pomeranians: matches += 1
     if aunty.akitas == match.akitas: matches += 1
     if aunty.vizslas == match.vizslas: matches += 1
-    if aunty.goldfish == match.goldfish: matches += 1
-    if aunty.trees == match.trees: matches += 1
+    if aunty.goldfish < match.goldfish: matches += 1
+    if aunty.trees > match.trees: matches += 1
     if aunty.cars == match.cars: matches += 1
     if aunty.perfumes == match.perfumes: matches += 1
 
 
-    if matches > highestMatches:
+    if matches >= highestMatches:
         highestMatches = matches
         mostLikelyAunty = key
 
