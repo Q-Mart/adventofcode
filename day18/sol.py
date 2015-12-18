@@ -39,9 +39,6 @@ def evolve(board):
     return newBoard
 
 for step in xrange(STEPS):
-    # for line in board:
-    #     print line
     board = evolve(board)
-    # print '--------------------------------------------------------------'
 
 print sum(map(len, [filter(lambda x: x==ON, line) for line in board]))
