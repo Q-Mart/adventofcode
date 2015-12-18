@@ -8,7 +8,6 @@ ON = '#'
 OFF = '.'
 STEPS = 100
 
-GAME_EVOLVING = True
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 
@@ -63,10 +62,9 @@ while True:
             if board[y][x] == ON: pygame.draw.rect(screen, WHITE, (50*x,50*y,50,50))
             else: pygame.draw.rect(screen, BLACK, (5*x,5*y,5,5))
 
-    if stepNumber != STEPS:
-        board = evolve(board)
-        stepNumber += 1
-        time.sleep(0.1)
+    board = evolve(board)
+    stepNumber += 1
+    time.sleep(0.1)
 
 
     pygame.display.update()
