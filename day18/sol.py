@@ -1,8 +1,22 @@
+import sys
+import pygame
+import time
+
+pygame.init()
+
 ON = '#'
 OFF = '.'
 STEPS = 100
 
+GAME_EVOLVING = True
+WHITE = (255,255,255)
+BLACK = (0,0,0)
+
 board = []
+
+stepNumber = 0
+
+screen = pygame.display.set_mode((500,500),0,32)
 
 with open('input') as f:
     board = map(str.strip, f.readlines())
@@ -38,7 +52,21 @@ def evolve(board):
         newBoard.append(newYString)
     return newBoard
 
-for step in xrange(STEPS):
-    board = evolve(board)
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: sys.exit()
 
-print sum(map(len, [filter(lambda x: x==ON, line) for line in board]))
+    screen.fill(BLACK)
+
+    for y in xrange(len(board)-1):
+        for x in xrange(len(board)-1):
+            if board[y][x] == ON: pygame.draw.rect(screen, WHITE, (50*x,50*y,50,50))
+            else: pygame.draw.rect(screen, BLACK, (5*x,5*y,5,5))
+
+    if stepNumber != STEPS:
+        board = evolve(board)
+        stepNumber += 1
+        time.sleep(0.1)
+
+
+    pygame.display.update()
