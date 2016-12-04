@@ -5,14 +5,37 @@
 int x = 1;
 int y = 1;
 std::string keycode = "";
-const int KEYPAD[3][3] = { {1,2,3},
-                           {4,5,6},
-                           {7,8,9} };
 
-void processInstruction(char);
-std::string processInstructionSet(char*);
+const int KEYPAD1[3][3] = { {1,2,3},
+                            {4,5,6},
+                            {7,8,9} };
 
-void processInstruction(char c) {
+const int KEYPAD2[5][5] = { {0,0,1,0,0},
+                            {0,2,3,4,0},
+                            {5,6,7,8,9},
+                            {0,0xA,0xB,0xC,0},
+                            {0,0,0xD,0,0} };
+
+void processInstruction(char, int, int**);
+std::string toString(int);
+
+std::string toString(int a) {
+  if (a < 0xA) {
+    return std::to_string(a);
+  }
+
+  switch (a) {
+    case 0xA : return "A";
+    case 0xB : return "B";
+    case 0xC : return "C";
+    case 0xD : return "D";
+  }
+  
+  return "";
+}
+
+
+void processInstruction(char c, int size) {
   switch (c) {
     case 'U' : --y;
                break;
@@ -22,8 +45,6 @@ void processInstruction(char c) {
                break;
     case 'R' : ++x;
                break;
-    case '\n' : keycode += std::to_string(KEYPAD[y][x]);
-                break;
     default: break;
   }
 
@@ -33,8 +54,8 @@ void processInstruction(char c) {
       *i = 0;
     }
 
-    if (*i > 2) {
-      *i = 2;
+    if (*i > size) {
+      *i = size;
     }
   }
 }
@@ -48,7 +69,26 @@ int main() {
 
   char c;
   while (input.get(c)) {
-    processInstruction(c);
+    processInstruction(c, 5);
+
+    if (KEYPAD2[y][x] == 0)
+    {
+      switch (c) {
+        case 'U': ++y;
+                  break;
+        case 'D': --y;
+                  break;
+        case 'L': ++x;
+                 break;
+        case 'R': --x;
+                  break;
+      }
+    }
+
+
+    if (c == '\n') {
+      keycode += toString(KEYPAD2[y][x]);
+    }
   }
 
   input.close();
