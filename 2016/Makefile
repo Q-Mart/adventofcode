@@ -9,6 +9,6 @@ all: ${CUR_SLNS}
 %:
 	@echo -e '\x1b[1;34mCompiling day $@ solution\x1b[0m'
 	${CXX} -o builds/day$@ ${FLAGS} ${FLAGS_DAY_$@} src/day$@.cpp
-	@./builds/day$@ inputs/day$@.input
+	@./builds/day$@
 
 .PHONY: all
