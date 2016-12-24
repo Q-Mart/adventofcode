@@ -52,7 +52,7 @@ class Explorer():
     def getTotalDistanceTravelled(self):
         return abs(self.xTravelled) + abs(self.yTravelled)
 
-with open('day1.txt') as f:
+with open('inputs/day1.txt') as f:
     data = f.readline()
 
 tokens =  map(str.strip, data.split(','))
