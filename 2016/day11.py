@@ -39,21 +39,30 @@ def children(state):
     if currentFloor in pair:
       pairsOnFloor.append(pair)
 
-  possiblePairsToTake = chain(combinations(pairsOnFloor,1), combinations(pairsOnFloor,2))
+  listOfItemsOnFloors = list(sum(items,() ))
+  itemsAvailable = []
+  for i in xrange(len(listOfItemsOnFloors)):
+    if listOfItemsOnFloors[i] == currentFloor:
+      itemsAvailable.append(i)
 
-  for pairs in possiblePairsToTake:
-    print "pairs: " + str(pairs)
+  indexesToTake = chain(combinations(itemsAvailable,1), combinations(itemsAvailable,2))
+
+  for indexes in indexesToTake:
     for i in [-1, 1]:
       newFloor = currentFloor + i
       if newFloor>3 or newFloor<0:
         continue
 
-      newItems = list(items)
-      for pair in pairs:
-        indexOfItem = pair.index(currentFloor)
-        newItems.remove(pair)
-        newItems = newItems + [pair[:indexOfItem] + (newFloor,) + pair[indexOfItem+1:]]
-      results.append((newFloor, state[1]+1, newItems, state))
+      listOfItemsOnFloors = list(sum(items,() ))
+      for index in indexes:
+        listOfItemsOnFloors[index] = newFloor
+
+      it = iter(listOfItemsOnFloors)
+      newItems = zip(it, it)
+
+      newState = (newFloor, state[1]+1, newItems, state)
+      if isValid(newState):
+        results.append(newState)
   return results
 
 def isValid(state):
@@ -61,16 +70,13 @@ def isValid(state):
   items = list(state[2])
   pairsOnFloor = []
 
+  #get the pairs on the current floor
   pairsOnFloor = filter(lambda pair: currentFloor in pair, items)
+  #we only care about the microchips/generators that are not with their 'partner'
   pairsOnFloor = filter(lambda pair: pair.count(currentFloor) != 2, pairsOnFloor)
-  if len(pairsOnFloor) <= 1:
-    return True
   microChipsPresentOnFloor = bool(len(filter(lambda pair: pair.index(currentFloor) == 1, pairsOnFloor)))
   generatorsPresentOnFloor = bool(len(filter(lambda pair: pair.index(currentFloor) == 0, pairsOnFloor)))
-  if not(microChipsPresentOnFloor) and not(generatorMatcher):
-    return True
-
-  return microChipsPresentOnFloor != generatorsPresentOnFloor
+  return not(microChipsPresentOnFloor) or not(generatorsPresentOnFloor)
 
 def atGoal(state):
   pairs = state[2]
@@ -89,10 +95,6 @@ def bfs(root):
     if (node[0], node[2]) in visitedNodes:
       continue
 
-    if not(isValid(node)):
-      continue
-
-    print node[2]
     if atGoal(node):
       return node
     else:
