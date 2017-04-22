@@ -1,6 +1,8 @@
 import re
+import math
 from itertools import combinations, chain
 from copy import deepcopy
+from heapq import heappush, heappop
 
 microMatcher = re.compile(r'(\w+)-compatible (microchip)')
 generatorMatcher = re.compile(r'(\w+) (generator)')
@@ -39,7 +41,7 @@ def children(state):
     if currentFloor in pair:
       pairsOnFloor.append(pair)
 
-  listOfItemsOnFloors = list(sum(items,() ))
+  listOfItemsOnFloors = list(sum(items, ()))
   itemsAvailable = []
   for i in xrange(len(listOfItemsOnFloors)):
     if listOfItemsOnFloors[i] == currentFloor:
@@ -60,7 +62,7 @@ def children(state):
       it = iter(listOfItemsOnFloors)
       newItems = zip(it, it)
 
-      newState = (newFloor, state[1]+1, newItems, state)
+      newState = (newFloor, state[1]+1, newItems)
       if isValid(newState):
         results.append(newState)
   return results
@@ -81,6 +83,31 @@ def isValid(state):
 def atGoal(state):
   pairs = state[2]
   return filter(lambda x: x != (3,3), pairs) == []
+
+def h(state):
+  #flatten pairs into list
+  listOfItemsOnFloors = list(sum(list(state[2]), ()))
+  total = sum(len(floor) * i for (i, floor) in enumerate(reversed(list(state[2]))))
+  # return reduce(lambda acc, item: acc + (3-item), listOfItemsOnFloors, 0)
+  return math.ceil(total / 2)
+
+
+def aStar(root):
+  frontier = [(0, root)]
+  visitedNodes = []
+  (f,currentNode) = heappop(frontier)
+  while not atGoal(currentNode):
+    while (currentNode[0], currentNode[2]) in visitedNodes:
+      (f,currentNode) = heappop(frontier)
+
+    visitedNodes.append((currentNode[0], currentNode[2]))
+    for child in children(currentNode):
+      g = child[1]
+      f = g + h(child)
+      heappush(frontier, (f, child))
+    
+
+  return currentNode
 
 def bfs(root):
   nodesToTry = []
@@ -109,4 +136,4 @@ with open('inputs/day11.txt') as f:
 #(current floor number, number of floors moved, current list of pairs)
 pairs = extractPairs(floors)
 currentState = (0, 0, pairs, "Parent")
-print bfs(currentState)
+print aStar(currentState)
