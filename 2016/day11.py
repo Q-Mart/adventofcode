@@ -35,11 +35,6 @@ def children(state):
   results = []
   currentFloor = state[0]
   items = list(state[2])
-  pairsOnFloor = []
-
-  for pair in items:
-    if currentFloor in pair:
-      pairsOnFloor.append(pair)
 
   listOfItemsOnFloors = list(sum(items, ()))
   itemsAvailable = []
@@ -87,9 +82,7 @@ def atGoal(state):
 def h(state):
   #flatten pairs into list
   listOfItemsOnFloors = list(sum(list(state[2]), ()))
-  total = sum(len(floor) * i for (i, floor) in enumerate(reversed(list(state[2]))))
-  # return reduce(lambda acc, item: acc + (3-item), listOfItemsOnFloors, 0)
-  return math.ceil(total / 2)
+  return reduce(lambda acc, item: acc + (3-item), listOfItemsOnFloors, 0)
 
 
 def aStar(root):
@@ -97,38 +90,17 @@ def aStar(root):
   visitedNodes = []
   (f,currentNode) = heappop(frontier)
   while not atGoal(currentNode):
-    while (currentNode[0], currentNode[2]) in visitedNodes:
+    while (currentNode[0], set(currentNode[2])) in visitedNodes:
       (f,currentNode) = heappop(frontier)
 
-    visitedNodes.append((currentNode[0], currentNode[2]))
+    visitedNodes.append((currentNode[0], set(currentNode[2])))
+    print currentNode
     for child in children(currentNode):
       g = child[1]
       f = g + h(child)
       heappush(frontier, (f, child))
-    
 
   return currentNode
-
-def bfs(root):
-  nodesToTry = []
-  visitedNodes = []
-  if atGoal(root):
-    return root
-
-  visitedNodes.append((root[0], root[2]))
-  nodesToTry = children(root)
-  while nodesToTry:
-    node = nodesToTry.pop(0)
-    if (node[0], node[2]) in visitedNodes:
-      continue
-
-    if atGoal(node):
-      return node
-    else:
-      visitedNodes.append((node[0], node[2]))
-      nodesToTry += children(node)
-
-  return "fail"
 
 with open('inputs/day11.txt') as f:
   floors = map(extract, map(str.strip, f.readlines()))
