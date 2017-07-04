@@ -69,11 +69,20 @@ def isValid(state):
 
   #get the pairs on the current floor
   pairsOnFloor = filter(lambda pair: currentFloor in pair, items)
-  #we only care about the microchips/generators that are not with their 'partner'
-  pairsOnFloor = filter(lambda pair: pair.count(currentFloor) != 2, pairsOnFloor)
-  microChipsPresentOnFloor = bool(len(filter(lambda pair: pair.index(currentFloor) == 1, pairsOnFloor)))
-  generatorsPresentOnFloor = bool(len(filter(lambda pair: pair.index(currentFloor) == 0, pairsOnFloor)))
-  return not(microChipsPresentOnFloor) or not(generatorsPresentOnFloor)
+  # #we only care about the microchips/generators that are not with their 'partner'
+  unpariedPairsOnFloor = filter(lambda pair: pair.count(currentFloor) != 2, pairsOnFloor)
+  if not unpariedPairsOnFloor:
+    return True
+
+  singleGenerators = False
+  singleMicroChips = False
+  for pair in unpariedPairsOnFloor:
+    if pair[1] == currentFloor and pair[0] != currentFloor:
+      singleMicroChips = True
+    elif pair[0] == currentFloor and pair[1] != currentFloor:
+      singleGenerators = True
+
+  return singleGenerators and not(singleMicroChips)
 
 def atGoal(state):
   pairs = state[2]
@@ -109,3 +118,6 @@ with open('inputs/day11.txt') as f:
 pairs = extractPairs(floors)
 currentState = (0, 0, pairs, "Parent")
 print aStar(currentState)
+
+print(isValid((1,1,[(2,0), (1,1)])))
+print(isValid((2,2,[(2,0), (2,2)])))
