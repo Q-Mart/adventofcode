@@ -6,6 +6,7 @@ from heapq import heappush, heappop
 
 microMatcher = re.compile(r'(\w+)-compatible (microchip)')
 generatorMatcher = re.compile(r'(\w+) (generator)')
+rejections = []
 
 def extract(data):
   return microMatcher.findall(data) + generatorMatcher.findall(data)
@@ -50,6 +51,7 @@ def children(state):
       if newFloor>3 or newFloor<0:
         continue
 
+      #separate tuples out into single list
       listOfItemsOnFloors = list(sum(items,() ))
       for index in indexes:
         listOfItemsOnFloors[index] = newFloor
@@ -60,29 +62,23 @@ def children(state):
       newState = (newFloor, state[1]+1, newItems)
       if isValid(newState):
         results.append(newState)
+      else:
+        rejections.append(newState)
   return results
 
 def isValid(state):
   currentFloor = state[0]
   items = list(state[2])
-  pairsOnFloor = []
 
   #get the pairs on the current floor
   pairsOnFloor = filter(lambda pair: currentFloor in pair, items)
-  # #we only care about the microchips/generators that are not with their 'partner'
-  unpariedPairsOnFloor = filter(lambda pair: pair.count(currentFloor) != 2, pairsOnFloor)
-  if not unpariedPairsOnFloor:
-    return True
+  pairsWithChipsOnFloor = filter(lambda pair: pair[1] == currentFloor, pairsOnFloor)
+  
+  everyChipHasGenerator = all(p.count(currentFloor)==2 for p in pairsWithChipsOnFloor)
+  generatorsPresent = any(p[0] == currentFloor for p in pairsOnFloor)
+  microChipsPresent = any(p[1] == currentFloor for p in pairsOnFloor)
 
-  singleGenerators = False
-  singleMicroChips = False
-  for pair in unpariedPairsOnFloor:
-    if pair[1] == currentFloor and pair[0] != currentFloor:
-      singleMicroChips = True
-    elif pair[0] == currentFloor and pair[1] != currentFloor:
-      singleGenerators = True
-
-  return singleGenerators and not(singleMicroChips)
+  return not generatorsPresent or everyChipHasGenerator
 
 def atGoal(state):
   pairs = state[2]
@@ -92,7 +88,6 @@ def h(state):
   #flatten pairs into list
   listOfItemsOnFloors = list(sum(list(state[2]), ()))
   return reduce(lambda acc, item: acc + (3-item), listOfItemsOnFloors, 0)
-
 
 def aStar(root):
   frontier = [(0, root)]
@@ -118,6 +113,5 @@ with open('inputs/day11.txt') as f:
 pairs = extractPairs(floors)
 currentState = (0, 0, pairs, "Parent")
 print aStar(currentState)
-
 print(isValid((1,1,[(2,0), (1,1)])))
 print(isValid((2,2,[(2,0), (2,2)])))
