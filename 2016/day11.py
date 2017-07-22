@@ -3,6 +3,7 @@ import math
 from itertools import combinations, chain
 from copy import deepcopy
 from heapq import heappush, heappop
+from collections import namedtuple
 
 microMatcher = re.compile(r'(\w+)-compatible (microchip)')
 generatorMatcher = re.compile(r'(\w+) (generator)')
@@ -11,107 +12,85 @@ rejections = []
 def extract(data):
   return microMatcher.findall(data) + generatorMatcher.findall(data)
 
-def extractPairs(floors):
+def extractIntoFrozenSets(floors):
   """
   returns a list of 2 integer tuples for each element in the form of
   (floor number for the generator, floor number for the microchip)
   """
 
-  pairs = {}
+  result = ()
   for floorNum in xrange(len(floors)):
+    elements = ()
     for device in floors[floorNum]:
       element = device[0]
       deviceType = device[1]
-      if element in pairs:
-        if deviceType == 'generator':
-          pairs[element] = [floorNum] + pairs[element]
-        else:
-          pairs[element] += [floorNum]
+      if deviceType == 'generator':
+        elements += (element + 'G',)
       else:
-        pairs[element] = [floorNum]
+        elements += (element + 'M',)
+    result += (frozenset(elements),)
 
-  return map(tuple, pairs.values())
+  return result
 
-def children(state):
-  results = []
-  currentFloor = state[0]
-  items = list(state[2])
+State = namedtuple('State', 'elevator, floors')
 
-  listOfItemsOnFloors = list(sum(items, ()))
-  itemsAvailable = []
-  for i in xrange(len(listOfItemsOnFloors)):
-    if listOfItemsOnFloors[i] == currentFloor:
-      itemsAvailable.append(i)
+def fs(*items): return frozenset(items)
 
-  indexesToTake = chain(combinations(itemsAvailable,1), combinations(itemsAvailable,2))
+legal_floors = {0, 1, 2, 3}
 
-  for indexes in indexesToTake:
-    for i in [-1, 1]:
-      newFloor = currentFloor + i
-      if newFloor>3 or newFloor<0:
-        continue
+def combos(things):
+  "All subsets of 1 or 2 things."
+  for s in chain(combinations(things, 1), combinations(things, 2)):
+    yield fs(*s)
 
-      #separate tuples out into single list
-      listOfItemsOnFloors = list(sum(items,() ))
-      for index in indexes:
-        listOfItemsOnFloors[index] = newFloor
+def moves(state):
+  "All legal states that can be reached in one move from this state"
+  L, floors = state
+  for L2 in {L + 1, L - 1} & legal_floors:
+    for stuff in combos(floors[L]):
+      newfloors = tuple((s | stuff if i == L2 else
+                         s - stuff if i == state.elevator else
+                         s)
+                        for (i, s) in enumerate(state.floors))
+      if legal_floor(newfloors[L]) and legal_floor(newfloors[L2]):
+        yield State(L2, newfloors)
 
-      it = iter(listOfItemsOnFloors)
-      newItems = zip(it, it)
+def legal_floor(floor):
+  "Floor is legal if no RTG, or every chip has its corresponding RTG."
+  rtgs  = any(r.endswith('G') for r in floor)
+  chips = [c for c in floor if c.endswith('M')]
+  return not rtgs or all(generator_for(c) in floor for c in chips)
 
-      newState = (newFloor, state[1]+1, newItems)
-      if isValid(newState):
-        results.append(newState)
-      else:
-        rejections.append(newState)
-  return results
+def generator_for(chip): return chip[0] + 'G'
 
-def isValid(state):
-  currentFloor = state[0]
-  items = list(state[2])
+def h_to_top(state):
+  "An estimate of the number of moves needed to move everything to top."
+  total = sum(len(floor) * i for (i, floor) in enumerate(reversed(state.floors)))
+  return math.ceil(total / 2) # Can move two items in one move.
 
-  #get the pairs on the current floor
-  pairsOnFloor = filter(lambda pair: currentFloor in pair, items)
-  pairsWithChipsOnFloor = filter(lambda pair: pair[1] == currentFloor, pairsOnFloor)
-  
-  everyChipHasGenerator = all(p.count(currentFloor)==2 for p in pairsWithChipsOnFloor)
-  generatorsPresent = any(p[0] == currentFloor for p in pairsOnFloor)
-  microChipsPresent = any(p[1] == currentFloor for p in pairsOnFloor)
+def astar_search(start, h_func, moves_func):
+    "Find a shortest sequence of states from start to a goal state (a state s with h_func(s) == 0)."
+    frontier  = [(h_func(start), start)] # A priority queue, ordered by path length, f = g + h
+    previous  = {start: None}  # start state has no previous state; other states will
+    path_cost = {start: 0}     # The cost of the best path to a state.
+    while frontier:
+        (f, s) = heappop(frontier)
+        if h_func(s) == 0:
+            return Path(previous, s)
+        for s2 in moves_func(s):
+            new_cost = path_cost[s] + 1
+            if s2 not in path_cost or new_cost < path_cost[s2]:
+                heappush(frontier, (new_cost + h_func(s2), s2))
+                path_cost[s2] = new_cost
+                previous[s2] = s
+    return dict(fail=True, front=len(frontier), prev=len(previous))
 
-  return not generatorsPresent or everyChipHasGenerator
-
-def atGoal(state):
-  pairs = state[2]
-  return filter(lambda x: x != (3,3), pairs) == []
-
-def h(state):
-  #flatten pairs into list
-  listOfItemsOnFloors = list(sum(list(state[2]), ()))
-  return reduce(lambda acc, item: acc + (3-item), listOfItemsOnFloors, 0)
-
-def aStar(root):
-  frontier = [(0, root)]
-  visitedNodes = []
-  (f,currentNode) = heappop(frontier)
-  while not atGoal(currentNode):
-    while (currentNode[0], set(currentNode[2])) in visitedNodes:
-      (f,currentNode) = heappop(frontier)
-
-    visitedNodes.append((currentNode[0], set(currentNode[2])))
-    print currentNode
-    for child in children(currentNode):
-      g = child[1]
-      f = g + h(child)
-      heappush(frontier, (f, child))
-
-  return currentNode
+def Path(previous, s): 
+  "Return a list of states that lead to state s, according to the previous dict."
+  return ([] if (s is None) else Path(previous, previous[s]) + [s])
 
 with open('inputs/day11.txt') as f:
   floors = map(extract, map(str.strip, f.readlines()))
 
-#(current floor number, number of floors moved, current list of pairs)
-pairs = extractPairs(floors)
-currentState = (0, 0, pairs, "Parent")
-print aStar(currentState)
-print(isValid((1,1,[(2,0), (1,1)])))
-print(isValid((2,2,[(2,0), (2,2)])))
+c1 = State(0, (fs('PG', 'PM'), fs('CG', 'cG', 'RG', 'pG'), fs('CM', 'cM', 'RM', 'PM'), fs()))
+print len(astar_search(c1, h_to_top, moves)) - 1
