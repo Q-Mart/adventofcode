@@ -8,4 +8,4 @@ def getDay(dayNumber):
     return lines
 
 def getNumbers(string):
-    return re.findall(r'-?\d+').group()
+    return re.findall(r'-?\d+', string)
