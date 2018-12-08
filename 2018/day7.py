@@ -1,46 +1,6 @@
 import utils
 import re
-
-IDLE = 0
-WORKING = 1
-
-class Worker:
-    def __init__(self, ID, constant):
-        self.id = ID
-        self.constant = constant
-        self.state = IDLE
-        self.currentJob = None
-
-        self.completionTime = None
-        self.currentWorkTime = 1
-
-    def work(self, S, edges, completed):
-        if self.state == WORKING:
-
-            if self.currentWorkTime == self.completionTime:
-                self.completionTime = None
-                self.currentWorkTime = 1
-                self.state = IDLE
-                completed.add(self.currentJob)
-
-                for m in getChildren(self.currentJob, edges):
-                    del edges[edges.index((self.currentJob, m))]
-                    if noDependencies(m, edges):
-                        S.append(m)
-                self.currentJob = None
-
-            self.currentWorkTime += 1
-
-        if self.state == IDLE and S != []:
-            S = sorted(S, reverse=True)
-            n = S.pop()
-
-            self.currentJob = n
-            self.completionTime = ord(self.currentJob) - 64 + self.constant
-            self.state = WORKING
-            self.currentWorkTime = 1
-
-        return S, edges, completed
+import networkx
 
 def extractFirstLetter(text):
     return re.search(r'(?<=Step )\D', text).group()
@@ -69,22 +29,32 @@ def part1(S, edges):
 
     return ''.join(L)
 
-def part2(S, edges, numWorkers, constant, stepCharacters):
-    numSeconds = 0
-    completed = set()
-    workers = [Worker(i, constant) for i in range(numWorkers)]
+def part2(steps):
+    G = networkx.DiGraph()
+    for s in steps:
+        G.add_edge(extractFirstLetter(s), extractSecondLetter(s))
 
-    print ('Seconds\t W1\t W2')
-    while completed != stepCharacters:
-        printString = '{0}\t'.format(numSeconds)
-        for w in workers:
-            S, edges, completed = w.work(S, edges, completed)
-            printString += '{0}\t'.format(w.currentJob)
+    print (''.join(networkx.lexicographical_topological_sort(G)))
 
-        numSeconds += 1
-        print(printString)
+    taskTimes = []
+    tasks = []
+    time = 0
 
-    return numSeconds-1
+    while taskTimes or G:
+        availableTasks = [t for t in G if t not in tasks and G.in_degree(t) == 0]
+        if availableTasks and len(taskTimes) < 5:
+            task = min(availableTasks)
+            taskTimes.append(ord(task)-4)
+            tasks.append(task)
+        else:
+            minTime = min(taskTimes)
+            completed = [tasks[i] for i, v in enumerate(taskTimes) if v == minTime]
+            taskTimes = [v - minTime for v in taskTimes if v > minTime]
+            tasks = [t for t in tasks if t not in completed]
+            time += minTime
+            G.remove_nodes_from(completed)
+
+    return time
 
 steps = utils.getDay(7)
 # steps = ['Step C must be finished before step A can begin.',
@@ -112,12 +82,4 @@ for c in stepCharacters:
         S.append(c)
 
 print (part1(S, edges))
-
-edges = []
-for s in steps:
-    first = extractFirstLetter(s)
-    second = extractSecondLetter(s)
-    edges.append((first,second))
-
-# print (part2(S, edges, 2, 0, stepCharacters))
-print (part2(S, edges, 5, 60, stepCharacters))
+print (part2(steps))
