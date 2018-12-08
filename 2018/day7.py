@@ -1,35 +1,17 @@
 import utils
 import re
 
-class Node:
-    def __init__(self, name):
-        self.name = name
-        self.children = set()
-        self.parents = set()
-
 def extractFirstLetter(text):
     return re.search(r'(?<=Step )\D', text).group()
 
 def extractSecondLetter(text):
     return re.search(r'(?<=step )\D', text).group()
 
-def getNextStep(availableSteps, nodes, executionSequence):
-    temp = []
+def getChildren(n, edges):
+    return list(map(lambda x: x[1], filter(lambda e: e[0] == n, edges)))
 
-    foundNextStep = False
-    while not foundNextStep:
-        s = availableSteps.pop()
-
-        parentsNotYetExecuted = list(filter(lambda x: x not in executionSequence, nodes[s].parents))
-
-        if parentsNotYetExecuted == []:
-            foundNextStep = True
-            availableSteps += temp
-        else:
-            temp.append(s)
-
-    availableSteps += temp
-    return s, availableSteps
+def noDependencies(m, edges):
+    return list(filter(lambda e: m == e[1], edges)) == []
 
 steps = utils.getDay(7)
 # steps = ['Step C must be finished before step A can begin.',
@@ -42,35 +24,30 @@ steps = utils.getDay(7)
 
 stepCharacters = set(map(extractFirstLetter, steps)) | set(map(extractSecondLetter, steps))
 
-nodes = {}
-for c in stepCharacters:
-    nodes[c] = Node(c)
-
+edges = []
 for s in steps:
     first = extractFirstLetter(s)
     second = extractSecondLetter(s)
-    nodes[first].children.add(second)
-    nodes[second].parents.add(first)
+    edges.append((first,second))
 
-# Find the root node
-root = None
-for n in nodes.values():
-    if n.parents == set():
-        root = n.name
-        break
+# Kahn's algorithm
 
-executionSequence = []
-usedSteps = [root]
-availableSteps = [root]
-while availableSteps != []:
-    s, availableSteps = getNextStep(availableSteps, nodes, executionSequence)
-    executionSequence.append(s)
-    print (s)
-    for child in nodes[s].children:
-        if child not in usedSteps:
-            availableSteps.append(child)
-            usedSteps.append(child)
+# Find the root nodes
+S = []
+for c in stepCharacters:
+    if noDependencies(c, edges):
+        S.append(c)
 
-    availableSteps = sorted(availableSteps, reverse=True)
+L = []
 
-print (executionSequence)
+while S != []:
+    S = sorted(S, reverse=True)
+    n = S.pop()
+    L.append(n)
+
+    for m in getChildren(n, edges):
+        del edges[edges.index((n, m))]
+        if noDependencies(m, edges):
+            S.append(m)
+
+print (''.join(L))
