@@ -4,7 +4,7 @@ import re
 
 class MarbleGame:
     def __init__(self, highestMarble):
-        self.circle = [0]
+        self.circle = collections.deque([0])
         self.nextNumber = 1
         self.currentMarbleIndex = 0
         self.highest = highestMarble
@@ -15,16 +15,14 @@ class MarbleGame:
             self.scores[playerNumber] += self.nextNumber
             self.nextNumber += 1
 
-            sevenMarblesCounterClockwise = (self.currentMarbleIndex - 7) % (len(self.circle))
-            self.scores[playerNumber] += self.circle[sevenMarblesCounterClockwise]
-            del self.circle[sevenMarblesCounterClockwise]
-            self.currentMarbleIndex = sevenMarblesCounterClockwise
-        else:
-            # oneMarbleClockWise = (self.currentMarbleIndex + 1) % (len(self.circle))
-            twoMarblesClockwise = (self.currentMarbleIndex + 2) % (len(self.circle))
+            self.circle.rotate(-7)
+            self.scores[playerNumber] += self.circle[0]
+            del self.circle[0]
+            self.circle.rotate(1)
 
-            self.circle.insert(twoMarblesClockwise, self.nextNumber)
-            self.currentMarbleIndex = twoMarblesClockwise
+        else:
+            self.circle.rotate(1)
+            self.circle.insert(0, self.nextNumber)
             self.nextNumber += 1
 
         return self.circle
