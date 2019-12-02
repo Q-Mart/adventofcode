@@ -6,7 +6,7 @@ def get_day(year, day_number):
     return lines
 
 def print_part_1(ans):
-    print('{0}{1}{2}'.format('\033[91m', ans, '\033[0m'))
+    print('{0}Part 1: {1}{2}'.format('\033[91m', ans, '\033[0m'))
 
 def print_part_2(ans):
-    print('{0}{1}{2}'.format('\033[92m', ans, '\033[0m'))
+    print('{0}Part 2: {1}{2}'.format('\033[92m', ans, '\033[0m'))
