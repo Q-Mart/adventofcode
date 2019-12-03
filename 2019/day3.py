@@ -1,9 +1,43 @@
 import utils
+# import pygame
+# import sys
+
+# BLACK = 0, 0, 0
+# RED = 255, 0, 0,
+# GREEN = 0, 255, 0,
+
+# pygame.init()
 
 data = utils.get_day(2019, 3)
 
 def to_wire(line):
     return line.split(',')
+
+def trace_pygame(wire, screen, col, dist):
+    p1 = (100, 100)
+    p2 = (100, 100)
+
+    for direction in wire:
+        last_x, last_y = p2
+        orientation = direction[0]
+        distance = int(direction[1:])
+
+        for distance_one_point in range(1, distance+1):
+            p1 = p2
+            if orientation == 'U':
+                p2 = (last_x, last_y+dist)
+            elif orientation == 'D':
+                p2 = (last_x, last_y-dist)
+            elif orientation == 'R':
+                p2 = (last_x+dist, last_y)
+            elif orientation == 'L':
+                p2 = (last_x-dist, last_y)
+
+            pygame.draw.line(screen, col, p2, p1)
+            pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit()
 
 def trace(wire):
     points = [(0,0)]
@@ -73,3 +107,10 @@ assert(part_2(test_1) == 610)
 assert(part_2(test_2) == 410)
 
 utils.print_part_2(part_2(data))
+
+# size = width, height = 300, 300
+# screen = pygame.display.set_mode(size)
+# screen.fill(BLACK)
+
+# trace_pygame(to_wire(data[0]), screen, RED, 5)
+# trace_pygame(to_wire(data[1]), screen, GREEN, 5)
