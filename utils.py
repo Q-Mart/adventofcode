@@ -1,9 +1,42 @@
+import queue
+
 def get_day(year, day_number):
     lines = []
     with open("{0}/inputs/{1}.txt".format(year, day_number)) as f:
         lines = f.readlines()
         lines = list(map(str.strip, lines))
     return lines
+
+def bfs(start_state, goal_func, children_func):
+    current_state = start_state
+    visited = {current_state}
+    q = queue.Queue()
+    while not goal_func(current_state):
+        for child_state in children_func(current_state):
+            if child_state in visited:
+                continue
+            else:
+                q.put(child_state)
+
+        current_state = q.get()
+
+    return current_state
+
+def dfs(start_state, goal_func, children_func):
+    current_state = start_state
+    visited = {current_state}
+    stack = []
+    while not goal_func(current_state):
+        for child_state in children_func(current_state):
+            if child_state in visited:
+                continue
+            else:
+                stack.append(child_state)
+
+        current_state = stack.pop()
+
+    return current_state
+
 
 def print_part_1(ans):
     print('{0}Part 1: {1}{2}'.format('\033[91m', ans, '\033[0m'))
