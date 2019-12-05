@@ -10,6 +10,10 @@ ADD = 1
 MULT = 2
 INPUT = 3
 OUTPUT = 4
+JUMP_IF_TRUE = 5
+JUMP_IF_FALSE = 6
+LESS_THAN = 7
+EQUALS = 8
 HALT = 99
 
 class Intcode():
@@ -72,14 +76,48 @@ class Intcode():
             print('Output data:\n{0}'.format(self.get_data(param_1_ptr, opcode[-3])))
             self.ip += 2
 
+        elif instruction == JUMP_IF_TRUE:
+            param_1 = self.get_data(param_1_ptr, opcode[-3])
+            if param_1 != 0:
+                self.ip = self.get_data(param_2_ptr, opcode[-4])
+            else:
+                self.ip += 3
+
+        elif instruction == JUMP_IF_FALSE:
+            param_1 = self.get_data(param_1_ptr, opcode[-3])
+            if param_1 == 0:
+                self.ip = self.get_data(param_2_ptr, opcode[-4])
+            else:
+                self.ip += 3
+
+        elif instruction == LESS_THAN:
+            result_ptr = self.ip+3
+            param_1 = self.get_data(param_1_ptr, opcode[-3])
+            param_2 = self.get_data(param_2_ptr, opcode[-4])
+            if param_1 < param_2:
+                val = 1
+            else:
+                val = 0
+
+            self.store_data(result_ptr, val, opcode[-5])
+            self.ip += 4
+
+        elif instruction == EQUALS:
+            result_ptr = self.ip+3
+            param_1 = self.get_data(param_1_ptr, opcode[-3])
+            param_2 = self.get_data(param_2_ptr, opcode[-4])
+            if param_1 == param_2:
+                val = 1
+            else:
+                val = 0
+
+            self.store_data(result_ptr, val, opcode[-5])
+            self.ip += 4
+
         else:
             should_halt = True
             print('\033[93mError! Landed on unknown opcode {0}\033[0m'.format(instruction))
 
-
-        if self.ip > len(self.data) - 5:
-            # End of data, going further will result in out of bounds error
-            should_halt = True
 
         return should_halt
 
