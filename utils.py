@@ -9,7 +9,7 @@ def get_day(year, day_number):
 
 def bfs(start_state, goal_func, children_func):
     current_state = start_state
-    visited = {current_state}
+    visited = set(current_state)
     q = queue.Queue()
     while not goal_func(current_state):
         for child_state in children_func(current_state):
