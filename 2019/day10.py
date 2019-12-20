@@ -2,9 +2,7 @@ import utils
 
 data = utils.get_day(2019, 10)
 
-def gradient(x1, y1, x2, y2):
-    if x2 - x1 == 0:
-        return float('inf')
+def gradient_pair(x1, y1, x2, y2):
     return (y2-y1)/(x2-x1)
 
 def get_locations_of_asteroids(field):
