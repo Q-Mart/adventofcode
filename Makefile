@@ -1,6 +1,6 @@
 export PYTHONPATH = .
 
-YEAR?=2019
+YEAR?=2020
 
 CUR_SLNS=$(shell ls ${YEAR}/day* | cut -d / -f2 |sort -n)
 
