@@ -18,7 +18,7 @@ example = ['ecl:gry pid:860033327 eyr:2020 hcl:#fffffd',
            'iyr:2011 ecl:brn hgt:59in']
 
 hcl_regex = re.compile('#(\d|[a-f]){6}')
-pid_regex = re.compile('\d{9}')
+pid_regex = re.compile('^\d{9}$')
 
 VALID_KEYS = ['byr',
               'iyr',
@@ -50,17 +50,18 @@ def is_valid_stronger_rules(passport):
     if not(2010 <= int(passport['iyr']) <= 2020):
         return False
 
-    if not(2020 <= int(passport['iyr']) <= 2030):
+    if not(2020 <= int(passport['eyr']) <= 2030):
         return False
 
     unit = passport['hgt'][-2:]
-    height = int(passport['hgt'][:-2])
     if unit not in ['cm', 'in']:
         return False
-    elif unit == 'cm' and not(150 <= height <= 193):
-        return False
-    elif unit == 'in' and not(59 <= height <= 76):
-        return False
+    else:
+        height = int(passport['hgt'][:-2])
+        if unit == 'cm' and not(150 <= height <= 193):
+            return False
+        elif unit == 'in' and not(59 <= height <= 76):
+            return False
 
     if hcl_regex.match(passport['hcl']) == None:
         return False
@@ -73,7 +74,7 @@ def is_valid_stronger_rules(passport):
     if pid_regex.match(passport['pid']) == None:
         return False
 
-    return
+    return True
 
 def process(data):
     valid_passports = 0
@@ -96,13 +97,16 @@ def process(data):
             passport = to_dict(line)
             if is_valid(passport):
                 valid_passports += 1
+
+            if is_valid_stronger_rules(passport):
+                stronger_valid_passports += 1
         else:
             acc += ' ' + line
 
     return valid_passports, stronger_valid_passports
 
 assert(process(example)[0] == 2)
-utils.print_part_1(process(pp_data))
+utils.print_part_1(process(pp_data)[0])
 
 all_invalid = ['eyr:1972 cid:100',
                'hcl:#18171d ecl:amb hgt:170 pid:186cm iyr:2018 byr:1926',
@@ -131,5 +135,5 @@ all_valid = ['pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980',
              'eyr:2022',
              '',
              'iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719']
-print(process(all_valid))
 assert(process(all_valid)[1] == 4)
+utils.print_part_2(process(pp_data)[1])
