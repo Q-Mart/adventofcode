@@ -33,7 +33,10 @@ def dfs(start_state, goal_func, children_func):
             else:
                 stack.append(child_state)
 
-        current_state = stack.pop()
+        if len(stack) > 0:
+            current_state = stack.pop()
+        else:
+            return None
 
     return current_state
 
