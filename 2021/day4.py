@@ -6,12 +6,15 @@ data = utils.get_day(2021, 4)
 MARKER = 'X'
 BingoSubsystem = namedtuple(
     'BingoSubsystem',
-    ['numbers', 'last_called', 'orig_boards', 'tracked_boards']
+    ['numbers',
+     'last_called',
+     'last_winning_product',
+     'boards']
 )
 
 def parse(data):
     numbers = data[0].split(',')
-    orig_boards = []
+    boards = []
 
     # Start from first board
     i = 2
@@ -20,14 +23,13 @@ def parse(data):
         for j in range(5):
             new_board.append(data[i+j].split())
 
-        orig_boards.append(new_board)
+        boards.append(new_board)
         i += 6
 
-    tracked_boards = orig_boards.copy()
-    return BingoSubsystem(numbers, None, orig_boards, tracked_boards)
+    return BingoSubsystem(numbers, None, None, boards)
 
 def _calc_result(index, subsystem):
-    winning_board = subsystem.tracked_boards[index]
+    winning_board = subsystem.boards[index]
 
     sum_unmarked = 0
     for row in winning_board:
@@ -37,14 +39,14 @@ def _calc_result(index, subsystem):
 
     return sum_unmarked * subsystem.last_called
 
-def run_bingo(subsystem):
+def run_bingo(subsystem, f_when_winner_found):
     # Base cases
     # If we are out of numbers, no winner
-    if subsystem.numbers == []:
-        return -1
+    if subsystem.numbers == [] or subsystem.boards == []:
+        return subsystem.last_winning_product
 
     # Check for a winner
-    for i, board in enumerate(subsystem.tracked_boards):
+    for i, board in enumerate(subsystem.boards):
 
         row_found = False
         for row in board:
@@ -55,24 +57,37 @@ def run_bingo(subsystem):
         for j in range(len(board)):
             col_found = True
             for row in board:
-                if board[j] != MARKER:
+                if row[j] != MARKER:
                     col_found = False
                     continue
 
+            if col_found == True:
+                break
+
+        last_winning_product = None
         if row_found or col_found:
-            return _calc_result(i, subsystem)
+            result = _calc_result(i, subsystem)
+
+            should_return, last_winning_product = f_when_winner_found(i, result, subsystem)
+            if should_return:
+                return last_winning_product
 
     # Pop the next number and mark the boards
     number = subsystem.numbers[0]
 
-    for board in subsystem.tracked_boards:
+    for board in subsystem.boards:
         for row in board:
             for i in range(len(row)):
                 if row[i] == number:
                     row[i] = MARKER
 
-    new_subsystem = BingoSubsystem(subsystem.numbers[1:], int(number), subsystem.orig_boards, subsystem.tracked_boards)
-    return run_bingo(new_subsystem)
+    new_subsystem = BingoSubsystem(
+        subsystem.numbers[1:],
+        int(number),
+        subsystem.last_winning_product,
+        subsystem.boards
+    )
+    return run_bingo(new_subsystem, f_when_winner_found)
 
 
 
@@ -98,8 +113,26 @@ test_data = [
     " 2  0 12  3  7"
 ]
 
+part_1_f = lambda i, r, s: (True, r)
+
+def part_2_f(i, result, subsystem):
+    should_return = False
+
+    subsystem.boards.pop(i)
+    if subsystem.boards == []:
+        should_return = True
+
+    return should_return, result
+
 subsystem = parse(test_data)
-assert(run_bingo(subsystem) == 4512)
+assert(run_bingo(subsystem, part_1_f) == 4512)
+
+subsystem = parse(test_data)
+assert(run_bingo(subsystem, part_2_f) == 1924)
 
 subsystem = parse(data)
-utils.print_part_1(run_bingo(subsystem))
+utils.print_part_1(run_bingo(subsystem, part_1_f))
+
+subsystem = parse(data)
+utils.print_part_2(run_bingo(subsystem, part_2_f))
+
