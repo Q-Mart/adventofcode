@@ -1,4 +1,5 @@
 import utils
+from collections import defaultdict
 
 data = utils.get_day(2021, 6)
 
@@ -6,33 +7,31 @@ test_data = ['3,4,3,1,2']
 
 class School:
     def __init__(self, data):
-        self._fish = []
+        self._fish = defaultdict(int)
         for s in data[0].split(','):
-            self._fish.append(int(s))
+            self._fish[int(s)] += 1
 
     def run_1_day(self):
-        new_fish = []
-        for i in range(len(self._fish)):
-            current_fish = self._fish[i]
-            if current_fish == 0:
-                new_fish.append(8)
-                current_fish = 6
+        new_fish = defaultdict(int)
+        for timer, number_of_fish in self._fish.items():
+            if timer == 0:
+                new_fish[8] += number_of_fish
+                new_fish[6] += number_of_fish
             else:
-                current_fish -= 1
+                new_fish[timer-1] += number_of_fish
 
-            self._fish[i] = current_fish
-
-        self._fish += new_fish
+        self._fish = new_fish
 
     def run_n_days(self, n):
-        for _ in range(n):
+        for i in range(n):
             self.run_1_day()
 
     def get_number_of_fish(self):
-        return len(self._fish)
+        return sum(self._fish.values())
 
 test_school = School(test_data)
 test_school.run_n_days(18)
+print(test_school.get_number_of_fish())
 assert(test_school.get_number_of_fish() == 26)
 
 test_school = School(test_data)
@@ -47,3 +46,6 @@ test_school = School(test_data)
 test_school.run_n_days(256)
 assert(test_school.get_number_of_fish() == 26984457539)
 
+school = School(data)
+school.run_n_days(256)
+utils.print_part_2(school.get_number_of_fish())
