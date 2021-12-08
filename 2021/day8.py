@@ -1,6 +1,6 @@
 import utils
 
-segments_to_digits = {
+orig_segments_to_digits = {
     frozenset(['a', 'b', 'c', 'e', 'f', 'g']) : 0,
     frozenset(['c', 'f']): 1,
     frozenset(['a', 'c', 'd', 'e', 'g']): 2,
@@ -13,7 +13,7 @@ segments_to_digits = {
     frozenset(['a', 'b', 'c', 'd', 'f', 'g']) : 9,
 }
 
-digits_to_segments = {
+orig_digits_to_segments = {
     0: frozenset(['a', 'b', 'c', 'e', 'f', 'g']),
     1: frozenset(['c', 'f']),
     2: frozenset(['a', 'c', 'd', 'e', 'g']),
@@ -26,20 +26,20 @@ digits_to_segments = {
     9: frozenset(['a', 'b', 'c', 'd', 'f', 'g']),
 }
 
-def get_output_values(data):
-    values = []
+def process(data):
+    out = []
     for line in data:
-        values_str = line.split('|')[1]
-        values.append(values_str.split())
+        signals_str, values_str = line.split('|')
+        out.append((signals_str.split(), values_str.split()))
 
-    return values
+    return out
 
 def num_digits_with_unique_segments(values):
     unique_digit_lens = {
-        len(digits_to_segments[1]),
-        len(digits_to_segments[4]),
-        len(digits_to_segments[7]),
-        len(digits_to_segments[8])
+        len(orig_digits_to_segments[1]),
+        len(orig_digits_to_segments[4]),
+        len(orig_digits_to_segments[7]),
+        len(orig_digits_to_segments[8])
     }
 
     result = [v for v in values if len(v) in unique_digit_lens]
@@ -48,6 +48,75 @@ def num_digits_with_unique_segments(values):
 def total_num_digits_with_unque_segments(values_list):
     results = [num_digits_with_unique_segments(v) for v in values_list]
     return sum(results)
+
+def deduce_output_values(signals, values):
+    segments_to_digits = dict()
+    digits_to_segments = dict()
+
+    values = [frozenset(
+        [d for d in v]
+    ) for v in values]
+
+    signals = [frozenset(
+        [d for d in s]
+    ) for s in signals]
+    signals.sort(key=len)
+
+    for sig in signals:
+        # print(sig)
+        # First work out 1, 4, 7 and 8
+        if len(sig) == len(orig_digits_to_segments[1]):
+            segments_to_digits[sig] = 1
+            digits_to_segments[1] = sig
+        elif len(sig) == len(orig_digits_to_segments[4]):
+            segments_to_digits[sig] = 4
+            digits_to_segments[4] = sig
+        elif len(sig) == len(orig_digits_to_segments[7]):
+            segments_to_digits[sig] = 7
+            digits_to_segments[7] = sig
+        elif len(sig) == len(orig_digits_to_segments[8]):
+            segments_to_digits[sig] = 8
+            digits_to_segments[8] = sig
+
+        # Now work out 2, 3 and 5
+        if len(sig) == 5:
+            if digits_to_segments[1] < sig:
+                segments_to_digits[sig] = 3
+                digits_to_segments[3] = sig
+            else:
+                diff = sig - digits_to_segments[4]
+                if len(diff) == 3:
+                    segments_to_digits[sig] = 2
+                    digits_to_segments[2] = sig
+                else:
+                    segments_to_digits[sig] = 5
+                    digits_to_segments[5] = sig
+
+        # Now work out 6, 9 and 0
+        if len(sig) == 6:
+            if digits_to_segments[5] < sig:
+                if digits_to_segments[7] < sig:
+                    segments_to_digits[sig] = 9
+                    digits_to_segments[9] = sig
+                else:
+                    segments_to_digits[sig] = 6
+                    digits_to_segments[6] = sig
+            else:
+                segments_to_digits[sig] = 0
+                digits_to_segments[0] = sig
+
+    result = ""
+    for v in values:
+        result += str(segments_to_digits[v])
+
+    return int(result)
+
+def total_outputs(sigval_pairs):
+    r = 0
+    for sig, val in sigval_pairs:
+        r += deduce_output_values(sig, val)
+
+    return r
 
 data = utils.get_day(2021, 8)
 
@@ -68,5 +137,18 @@ test_data_2 = [
     'gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce'
 ]
 
-assert(total_num_digits_with_unque_segments(get_output_values(test_data_2)) == 26)
-utils.print_part_1(total_num_digits_with_unque_segments(get_output_values(data)))
+test_values_2 = [val for signal, val in process(test_data_2)]
+assert(total_num_digits_with_unque_segments(test_values_2) == 26)
+
+values = [val for signal, val in process(data)]
+utils.print_part_1(total_num_digits_with_unque_segments(values))
+
+test_data_1 = process(test_data_1)
+test_sigs_1 = test_data_1[0][0]
+test_vals_1 = test_data_1[0][1]
+assert(deduce_output_values(test_sigs_1, test_vals_1) == 5353)
+
+test_data_2 = process(test_data_2)
+assert(total_outputs(test_data_2) == 61229)
+
+utils.print_part_2(total_outputs(process(data)))
