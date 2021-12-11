@@ -6,7 +6,6 @@ def octopi(data):
 def step(octopi):
 
     def flash_surrounding(octopi, num_flashes=0):
-
         # Base case
         no_gt_9s = True
         for row in octopi:
@@ -31,11 +30,19 @@ def step(octopi):
                                 continue
 
                             if 0 <= y + dy < len(octopi):
-                                if 0 <= x + dx < len(octopus):
-                                    octopi[y+dy][x+dx] += 1
-
+                                if 0 <= x + dx < len(row):
+                                    # Ignore if energy level is 0
+                                    if octopi[y+dy][x+dx] > 0:
+                                        octopi[y+dy][x+dx] += 1
 
         return flash_surrounding(octopi, num_flashes)
+
+    for y, row in enumerate(octopi):
+        for x, octopus in enumerate(row):
+            octopi[y][x] += 1
+
+    return flash_surrounding(octopi)
+
 
 def n_steps(octopi, n):
     total = 0
@@ -44,7 +51,10 @@ def n_steps(octopi, n):
 
     return total
 
-test = octopi([
+def step_with_synchronise_flash(octopi):
+    pass
+
+test = [
     '5483143223',
     '2745854711',
     '5264556173',
@@ -55,8 +65,11 @@ test = octopi([
     '6882881134',
     '4846848554',
     '5283751526'
-])
+]
 
-data = octopi(utils.get_day(2021, 11))
+data = utils.get_day(2021, 11)
 
-print(n_steps(test, 10))
+test = octopi(test)
+assert n_steps(test,100) == 1656
+
+utils.print_part_1(n_steps(octopi(data), 100))
