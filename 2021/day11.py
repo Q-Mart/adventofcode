@@ -52,9 +52,21 @@ def n_steps(octopi, n):
     return total
 
 def step_with_synchronise_flash(octopi):
-    pass
+    all_0s = False
+    step_num = 0
 
-test = [
+    while not all_0s:
+        step_num += 1
+        step(octopi)
+
+        sum_of_octopi = sum(
+            [sum(row) for row in octopi]
+        )
+        all_0s = sum_of_octopi == 0
+
+    return step_num
+
+test_data = [
     '5483143223',
     '2745854711',
     '5264556173',
@@ -69,7 +81,12 @@ test = [
 
 data = utils.get_day(2021, 11)
 
-test = octopi(test)
+test = octopi(test_data)
 assert n_steps(test,100) == 1656
 
 utils.print_part_1(n_steps(octopi(data), 100))
+
+test = octopi(test_data)
+assert step_with_synchronise_flash(test) == 195
+
+utils.print_part_2(step_with_synchronise_flash(octopi(data)))
