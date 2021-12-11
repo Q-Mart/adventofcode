@@ -2,7 +2,7 @@ export PYTHONPATH = .
 
 YEAR?=2021
 
-CUR_SLNS=$(shell ls ${YEAR}/day* | cut -d / -f2 |sort -n)
+CUR_SLNS=$(shell python sorted_days.py ${YEAR})
 
 all: ${CUR_SLNS}
 
