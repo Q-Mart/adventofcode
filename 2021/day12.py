@@ -70,8 +70,7 @@ def search2(graph, revisit_node, visited_paths, path=['start']):
             if new_node == revisit_node:
                 if path.count(new_node) >= 2:
                     continue
-
-            if path.count(new_node) >= 1:
+            elif path.count(new_node) >= 1:
                     continue
 
         new_path = path + [new_node]
@@ -93,9 +92,8 @@ def search_and_visit_small_cave_at_most_twice(graph):
 
     visited = []
     for cave in small_caves:
-        # print(cave)
+        print(cave)
         visited += search2(graph, cave, visited)
-        # print(visited)
 
     return visited
 
@@ -151,5 +149,8 @@ assert len(search(to_graph(test_data_3))) == 226
 
 utils.print_part_1(len(search(to_graph((data)))))
 
-result = search_and_visit_small_cave_at_most_twice((to_graph(test_data_1)))
-print(len(result))
+# assert len(search_and_visit_small_cave_at_most_twice((to_graph(test_data_1)))) == 36
+# assert len(search_and_visit_small_cave_at_most_twice((to_graph(test_data_2)))) == 103
+# assert len(search_and_visit_small_cave_at_most_twice((to_graph(test_data_3)))) == 3509
+
+utils.print_part_2(len(search_and_visit_small_cave_at_most_twice((to_graph(data)))))
