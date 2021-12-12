@@ -18,6 +18,9 @@ def bfs(start_state, goal_func, children_func):
             else:
                 q.put(child_state)
 
+        if q.empty():
+            return current_state
+
         current_state = q.get()
 
     return current_state
@@ -36,7 +39,7 @@ def dfs(start_state, goal_func, children_func):
         if len(stack) > 0:
             current_state = stack.pop()
         else:
-            return None
+            return current_state
 
     return current_state
 
