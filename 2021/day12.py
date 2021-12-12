@@ -4,10 +4,11 @@ from collections import defaultdict, namedtuple
 State = namedtuple('State', ['current_path', 'visited_paths', 'graph'])
 
 def to_graph(data):
-    graph = defaultdict(list)
+    graph = defaultdict(set)
     for line in data:
         a, b = line.split('-')
-        graph[a].append(b)
+        graph[a].add(b)
+        graph[b].add(a)
 
     return graph
 
@@ -36,6 +37,23 @@ def children_func(state):
             )
         )
 
+def search(graph, path=['start']):
+    if 'start' in path and 'end' in path:
+        return [path]
+
+    visited = []
+
+    current_node = path[-1]
+    for new_node in graph[current_node]:
+        if new_node.islower() and path.count(new_node) >= 1:
+            continue
+
+        new_path = path + [new_node]
+        new_paths = search(graph, new_path)
+        visited += new_paths
+
+    return visited
+
 
 test_data_1 = [
     'start-A',
@@ -46,9 +64,6 @@ test_data_1 = [
     'A-end',
     'b-end'
 ]
-
-test_start_1 = State(current_path=['start'], visited_paths=[], graph=to_graph(test_data_1))
-print(utils.bfs(test_start_1, goal_func, children_func))
 
 test_data_2 = [
     'dc-end',
@@ -85,3 +100,9 @@ test_data_3 = [
 ]
 
 data = utils.get_day(2021, 12)
+
+assert len(search(to_graph(test_data_1))) == 10
+assert len(search(to_graph(test_data_2))) == 19
+assert len(search(to_graph(test_data_3))) == 226
+
+utils.print_part_1(len(search(to_graph((data)))))
