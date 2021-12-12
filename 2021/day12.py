@@ -54,9 +54,12 @@ def search(graph, path=['start']):
 
     return visited
 
-def search2(graph, revisit_node, path=['start']):
+def search2(graph, revisit_node, visited_paths, path=['start']):
     if 'start' in path and 'end' in path:
-        return [path]
+        if path not in visited_paths:
+            return [path]
+        else:
+            return []
 
     visited = []
 
@@ -72,7 +75,7 @@ def search2(graph, revisit_node, path=['start']):
                     continue
 
         new_path = path + [new_node]
-        new_paths = search2(graph, revisit_node, new_path)
+        new_paths = search2(graph, revisit_node, visited_paths, new_path)
         visited += new_paths
 
     return visited
@@ -90,7 +93,9 @@ def search_and_visit_small_cave_at_most_twice(graph):
 
     visited = []
     for cave in small_caves:
-        visited += search2(graph, cave)
+        # print(cave)
+        visited += search2(graph, cave, visited)
+        # print(visited)
 
     return visited
 
@@ -147,5 +152,4 @@ assert len(search(to_graph(test_data_3))) == 226
 utils.print_part_1(len(search(to_graph((data)))))
 
 result = search_and_visit_small_cave_at_most_twice((to_graph(test_data_1)))
-for r in result:
-    print(r)
+print(len(result))
