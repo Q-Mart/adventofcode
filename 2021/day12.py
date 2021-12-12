@@ -92,7 +92,6 @@ def search_and_visit_small_cave_at_most_twice(graph):
 
     visited = []
     for cave in small_caves:
-        print(cave)
         visited += search2(graph, cave, visited)
 
     return visited
