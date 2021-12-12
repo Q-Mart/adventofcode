@@ -12,31 +12,6 @@ def to_graph(data):
 
     return graph
 
-def goal_func(state):
-    path = state.current_path
-    return 'start' in path and 'end' in path
-
-def children_func(state):
-    children = []
-
-    current_node = state.current_path[-1]
-    new_nodes = state.graph[current_node]
-    for node in new_nodes:
-        if node.islower() and state.current_path.count(node) > 1:
-            continue
-
-        new_path = state.current_path+[node]
-        if new_path in state.visited_paths:
-            continue
-
-        children.append(
-            State(
-                current_path=state.current_path+[node],
-                visited_paths=state.visited_paths,
-                graph=state.graph
-            )
-        )
-
 def search(graph, path=['start']):
     if 'start' in path and 'end' in path:
         return [path]
@@ -96,6 +71,22 @@ def search_and_visit_small_cave_at_most_twice(graph):
 
     return visited
 
+# Taken for u/miran1 or github.com/narimiran. Writing here to learn about a faster solution
+def fast_traverse(graph, a='start', seen={'start'}, can_twice=False):
+    if a == 'end':
+        return 1
+
+    paths = 0
+    for b in graph[a]:
+        if b.islower():
+            if b not in seen:
+                paths += fast_traverse(graph, b, seen | {b}, can_twice)
+            elif can_twice and b not in {'start', 'end'}:
+                paths += fast_traverse(graph, b, seen | {b}, False)
+        else:
+            paths += fast_traverse(graph, b, seen, can_twice)
+    return paths
+
 test_data_1 = [
     'start-A',
     'start-b',
@@ -152,4 +143,4 @@ assert len(search_and_visit_small_cave_at_most_twice((to_graph(test_data_1)))) =
 assert len(search_and_visit_small_cave_at_most_twice((to_graph(test_data_2)))) == 103
 assert len(search_and_visit_small_cave_at_most_twice((to_graph(test_data_3)))) == 3509
 
-utils.print_part_2(len(search_and_visit_small_cave_at_most_twice((to_graph(data)))))
+utils.print_part_2(fast_traverse(to_graph(data), can_twice=True))
