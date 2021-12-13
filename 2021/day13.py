@@ -116,4 +116,4 @@ assert len(process_one_instruction(test_paper)) == 17
 utils.print_part_1(len(process_one_instruction(paper)))
 
 # process_all_instructions_and_print(test_paper)
-utils.print_part_1(len(process_one_instruction(paper)))
+utils.print_part_2(process_all_instructions_and_print(paper))
