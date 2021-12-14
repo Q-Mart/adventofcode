@@ -11,20 +11,16 @@ def template_and_rules(data):
     return data[0], rules
 
 def process(template, rules):
-    print(rules)
-    new_template = ''
-    for i in range(len(template)):
-        if i < len(template) - 1:
-            template_slice = template[i:i+2]
-            print(template_slice)
-            if template_slice in rules:
-                print(rules[template_slice])
-                new_template += rules[template_slice]
-            else:
-                new_template += template_slice
+    i = 0
+    while i < len(template):
+        template_slice = template[i:i+2]
+        if template_slice in rules:
+            template = template[:i] + rules[template_slice] + template[i+2:]
+            i += 2
+        else:
+            i += 1
 
-    print(new_template)
-    return new_template
+    return template
 
 def process_n_times(n, template, rules):
     temp = template
