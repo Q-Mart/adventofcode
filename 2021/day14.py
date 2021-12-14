@@ -41,9 +41,9 @@ def max_and_min_chars(template):
 
     return max, min
 
-def most_common_minus_least_common_after_10_processes(data):
-    template_after_10 = process_n_times(10, *template_and_rules(data))
-    max, min = max_and_min_chars(template_after_10)
+def most_common_minus_least_common_after_n_processes(n, data):
+    template_after_n = process_n_times(n, *template_and_rules(data))
+    max, min = max_and_min_chars(template_after_n)
     return max - min
 
 test_data = [
@@ -76,5 +76,7 @@ assert process_n_times(4, *template_and_rules(test_data)) == 'NBBNBNBBCCNBCNCCNB
 assert len(process_n_times(5, *template_and_rules(test_data))) == 97
 assert len(process_n_times(10, *template_and_rules(test_data))) == 3073
 
-assert most_common_minus_least_common_after_10_processes(test_data) == 1588
-utils.print_part_1(most_common_minus_least_common_after_10_processes(data))
+assert most_common_minus_least_common_after_n_processes(10, test_data) == 1588
+utils.print_part_1(most_common_minus_least_common_after_n_processes(10, data))
+
+assert most_common_minus_least_common_after_n_processes(40, test_data) == 2188189693529
