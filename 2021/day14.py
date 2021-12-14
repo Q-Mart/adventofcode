@@ -1,5 +1,6 @@
 import utils
 import sys
+from collections import defaultdict
 
 def template_and_rules(data):
     rules = {}
@@ -23,9 +24,30 @@ def process(template, rules):
 
     return template
 
+def new_process_n_times(n, template, rules):
+    pairs = defaultdict(int)
+
+    #Populate pairs dict
+    for i in range(len(template) - 1):
+        pair = template[i:i+2]
+        pairs[pair] += 1
+
+    for i in range(n):
+        new_pairs = defaultdict(int)
+        for pair, population in pairs.items():
+            if pair in rules:
+                child_1, child_2 = rules[pair][:2], rules[pair][1:]
+                new_pairs[child_1] = population
+                new_pairs[child_2] = population
+
+        pairs = new_pairs
+
+    return pairs
+
 def process_n_times(n, template, rules):
     temp = template
-    for _ in range(n):
+    for i in range(n):
+        print(i, len(temp))
         temp = process(temp, rules)
     return temp
 
@@ -45,6 +67,9 @@ def most_common_minus_least_common_after_n_processes(n, data):
     template_after_n = process_n_times(n, *template_and_rules(data))
     max, min = max_and_min_chars(template_after_n)
     return max - min
+
+def fast_most_common_minus_least_common_after_n_process(n, data):
+    pass
 
 test_data = [
     'NNCB',
@@ -79,4 +104,5 @@ assert len(process_n_times(10, *template_and_rules(test_data))) == 3073
 assert most_common_minus_least_common_after_n_processes(10, test_data) == 1588
 utils.print_part_1(most_common_minus_least_common_after_n_processes(10, data))
 
-assert most_common_minus_least_common_after_n_processes(40, test_data) == 2188189693529
+new_process_n_times(1, *template_and_rules(test_data))
+# assert most_common_minus_least_common_after_n_processes(40, test_data) == 2188189693529
