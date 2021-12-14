@@ -1,4 +1,5 @@
 import utils
+import sys
 
 def template_and_rules(data):
     rules = {}
@@ -28,6 +29,22 @@ def process_n_times(n, template, rules):
         temp = process(temp, rules)
     return temp
 
+def max_and_min_chars(template):
+    max = 0
+    min = sys.maxsize
+    for char in template:
+        c = template.count(char)
+        if c > max:
+            max = c
+        if c < min:
+            min = c
+
+    return max, min
+
+def most_common_minus_least_common_after_10_processes(data):
+    template_after_10 = process_n_times(10, *template_and_rules(data))
+    max, min = max_and_min_chars(template_after_10)
+    return max - min
 
 test_data = [
     'NNCB',
@@ -58,3 +75,6 @@ assert process_n_times(3, *template_and_rules(test_data)) == 'NBBBCNCCNBBNBNBBCH
 assert process_n_times(4, *template_and_rules(test_data)) == 'NBBNBNBBCCNBCNCCNBBNBBNBBBNBBNBBCBHCBHHNHCBBCBHCB'
 assert len(process_n_times(5, *template_and_rules(test_data))) == 97
 assert len(process_n_times(10, *template_and_rules(test_data))) == 3073
+
+assert most_common_minus_least_common_after_10_processes(test_data) == 1588
+utils.print_part_1(most_common_minus_least_common_after_10_processes(data))
