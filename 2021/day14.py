@@ -4,17 +4,19 @@ def template_and_rules(data):
     rules = {}
     for line in data[2:]:
         pair, insertion = line.split('->')
-        pair.strip()
-        insertion.strip()
+        pair = pair.strip()
+        insertion = insertion.strip()
         rules[pair] = pair[0] + insertion + pair[1]
 
     return data[0], rules
 
 def process(template, rules):
+    print(rules)
     new_template = ''
     for i in range(len(template)):
         if i < len(template) - 1:
             template_slice = template[i:i+2]
+            print(template_slice)
             if template_slice in rules:
                 print(rules[template_slice])
                 new_template += rules[template_slice]
