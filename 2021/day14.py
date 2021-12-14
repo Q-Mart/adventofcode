@@ -30,7 +30,7 @@ def process_n_times(n, template, rules):
         temp = process(temp, rules)
     return temp
 
-def new_process_n_times(n, template, rules):
+def fast_process_n_times(n, template, rules):
     pairs = defaultdict(int)
     counts = defaultdict(int)
 
@@ -76,8 +76,8 @@ def most_common_minus_least_common_after_n_processes(n, data):
     max, min = max_and_min_chars(template_after_n)
     return max - min
 
-def fast_most_common_minus_least_common_after_n_process(n, data):
-    counts = new_process_n_times(n, *template_and_rules(data))
+def fast_most_common_minus_least_common_after_n_processes(n, data):
+    counts = fast_process_n_times(n, *template_and_rules(data))
     return max(counts.values()) - min(counts.values())
 
 test_data = [
@@ -113,5 +113,6 @@ assert len(process_n_times(10, *template_and_rules(test_data))) == 3073
 assert most_common_minus_least_common_after_n_processes(10, test_data) == 1588
 utils.print_part_1(most_common_minus_least_common_after_n_processes(10, data))
 
-assert fast_most_common_minus_least_common_after_n_process(10, test_data) == 1588
-assert fast_most_common_minus_least_common_after_n_process(40, test_data) == 2188189693529
+assert fast_most_common_minus_least_common_after_n_processes(10, test_data) == 1588
+assert fast_most_common_minus_least_common_after_n_processes(40, test_data) == 2188189693529
+utils.print_part_2(fast_most_common_minus_least_common_after_n_processes(40, data))
