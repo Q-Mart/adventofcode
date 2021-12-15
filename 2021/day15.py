@@ -63,16 +63,15 @@ def gen_5x5_grid(data):
 
         new_data.append(''.join(new_row))
 
-    # Now the new first row is done, replicate it in the y direction 5 times
-    for i in range(5):
-        rows = new_data[i*5:(i+1)*5]
+    height = len(data)
+    # Now the new first row is done, replicate it in the y direction 4 times
+    rows = new_data[0: height]
+    for i in range(4):
         for row in rows:
             tile = [int(c) for c in row]
-            new_row = [str(wraparound(t + i)) for t in tile]
-            new_data.append(''.join(new_row))
+            new_row = ''.join([str(wraparound(t + i + 1)) for t in tile])
+            new_data.append(new_row)
 
-    print(new_data)
-    print(len(new_data) ,len(new_data[0]))
     return to_grid(new_data)
 
 test_data = [
