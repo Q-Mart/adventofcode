@@ -1,4 +1,5 @@
 import queue
+import heapq
 
 def get_day(year, day_number):
     lines = []
@@ -43,6 +44,27 @@ def dfs(start_state, goal_func, children_func):
 
     return current_state
 
+def a_star(start, h_func, cost_func, moves_func):
+    def get_path(previous, s):
+        return ([] if (s is None) else get_path(previous, previous[s]) + [s])
+
+    frontier = [(h_func(start), start)]
+    previous = {start: None}
+    path_cost = {start: 0}
+
+    while frontier:
+        (f, s) = heapq.heappop(frontier)
+        if h_func(s) == 0:
+            return get_path(previous, s)
+
+        for s2 in moves_func(s):
+            new_cost = path_cost[s] + cost_func(s)
+            if s2 not in path_cost or new_cost < path_cost[s2]:
+                heapq.heappush(frontier, (new_cost + h_func(s2), s2))
+                path_cost[s2] = new_cost
+                previous[s2] = s
+
+    return dict(fail=True, front=len(frontier), prev=len(previous))
 
 def print_part_1(ans):
     print('{0}Part 1: {1}{2}'.format('\033[91m', ans, '\033[0m'))
