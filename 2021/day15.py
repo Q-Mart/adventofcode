@@ -46,6 +46,35 @@ def moves_func(node, grid):
 def get_risk_start_not_entered(path):
     return sum([s.risk for s in path[1:]])
 
+def gen_5x5_grid(data):
+    new_data = []
+
+    def wraparound(val):
+        if val > 9:
+            return val % 9
+        return val
+
+    # Create the first row of tiles
+    for row in data:
+        new_row = ''
+        for i in range(5):
+            tile = [int(c) for c in row]
+            new_row += ''.join([str((wraparound(t + i))) for t in tile])
+
+        new_data.append(''.join(new_row))
+
+    # Now the new first row is done, replicate it in the y direction 5 times
+    for i in range(5):
+        rows = new_data[i*5:(i+1)*5]
+        for row in rows:
+            tile = [int(c) for c in row]
+            new_row = [str(wraparound(t + i)) for t in tile]
+            new_data.append(''.join(new_row))
+
+    print(new_data)
+    print(len(new_data) ,len(new_data[0]))
+    return to_grid(new_data)
+
 test_data = [
     '1163751742',
     '1381373672',
@@ -70,3 +99,5 @@ grid = to_grid(data)
 moves_func_part_1 = lambda s: moves_func(s, grid)
 path = utils.a_star(grid[0][0], h_func, cost_func, moves_func_part_1)
 utils.print_part_1(get_risk_start_not_entered(path))
+
+gen_5x5_grid(test_data)
