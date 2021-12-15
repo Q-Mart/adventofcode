@@ -44,7 +44,7 @@ def moves_func(node, grid):
     return next_nodes
 
 def get_risk_start_not_entered(path):
-    return sum([s.risk for s in path]) - 1
+    return sum([s.risk for s in path[1:]])
 
 test_data = [
     '1163751742',
@@ -65,3 +65,8 @@ test_grid = to_grid(test_data)
 moves_func_test_grid = lambda s: moves_func(s, test_grid)
 test_path = utils.a_star(test_grid[0][0], h_func, cost_func, moves_func_test_grid)
 assert get_risk_start_not_entered(test_path) == 40
+
+grid = to_grid(data)
+moves_func_part_1 = lambda s: moves_func(s, grid)
+path = utils.a_star(grid[0][0], h_func, cost_func, moves_func_part_1)
+utils.print_part_1(get_risk_start_not_entered(path))
