@@ -46,7 +46,17 @@ def dfs(start_state, goal_func, children_func):
 
 def a_star(start, h_func, cost_func, moves_func):
     def get_path(previous, s):
-        return ([] if (s is None) else get_path(previous, previous[s]) + [s])
+        if s is None:
+            return []
+
+        path = []
+        current = s
+        while current in previous:
+            path += [current]
+            current = previous[current]
+
+        path.reverse()
+        return path
 
     frontier = [(h_func(start), start)]
     previous = {start: None}

@@ -99,4 +99,12 @@ moves_func_part_1 = lambda s: moves_func(s, grid)
 path = utils.a_star(grid[0][0], h_func, cost_func, moves_func_part_1)
 utils.print_part_1(get_risk_start_not_entered(path))
 
-gen_5x5_grid(test_data)
+test_grid = gen_5x5_grid(test_data)
+moves_func_test_grid = lambda s: moves_func(s, test_grid)
+test_path = utils.a_star(test_grid[0][0], h_func, cost_func, moves_func_test_grid)
+assert get_risk_start_not_entered(test_path) == 315
+
+grid = gen_5x5_grid(data)
+moves_func_part_1 = lambda s: moves_func(s, grid)
+path = utils.a_star(grid[0][0], h_func, cost_func, moves_func_part_1)
+utils.print_part_2(get_risk_start_not_entered(path))
