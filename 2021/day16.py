@@ -28,11 +28,23 @@ class Value(Packet):
         return str(self.value)
 
 class Operator(Packet):
-    def __init__(self, version, sub_packets):
+    def __init__(self, version, subpackets):
         super().__init__(version)
-        self._sub_packets = sub_packets
+        self._subpackets = subpackets
+
+    def __repr__(self):
+        string = f'Operator(version={self._version}, subpackets=['
+        for packet in self._subpackets:
+            string += str(packet) + ','
+
+        string = string[:-2]
+        string += '])'
+        return string
 
 def parse_val(raw):
+    version = int(raw[:3])
+    raw = raw[6:]
+
     i = 0
     value_str = ''
     while i < len(raw) - 5:
@@ -43,54 +55,52 @@ def parse_val(raw):
         if extension == False:
             break
 
-    return to_decimal(value_str), raw[i:]
-
-def parse_subpackets_by_len(raw):
-    ptr = 0
-    subpackets = []
-
-    return subpackets
+    return Value(version=version, val=to_decimal(value_str)), raw[i:]
 
 def parse_operator(raw):
-    ptr = 6
-    length_type = int(raw[ptr])
-    ptr += 1
+    version = int(raw[:3])
+    raw = raw[6:]
+
+    length_type = int(raw[0])
+    raw = raw[1:]
 
     print(f'length_type: {length_type}')
-    length = None
-    num_subpackets = None
     if length_type == 0:
-        print(ptr, ptr+15)
-        print(raw[ptr:ptr+15])
-        length = to_decimal(raw[ptr:ptr+15])
-        ptr += 15
-        subpackets = parse_subpackets_by_len()(raw[ptr:ptr+length])
+        length = to_decimal(raw[:15])
+        raw = raw[15:]
+
+        subpackets = []
+        to_parse = raw[:length]
+
+        r = parse(to_parse)
+        while r != None:
+            new_sub, remainder = r
+            subpackets.append(new_sub)
+            r = parse(remainder)
+
     else:
-        num_subpackets = to_decimal(raw[ptr:ptr+11])
-        ptr += 11
+        print('NOT IMPLEMENTED')
         return
 
     print(f'length: {length}')
 
-    return subpackets
+    return Operator(version, subpackets), raw
 
 def parse(raw):
-    version = to_decimal(raw[:3])
+    if len(raw) < 11:
+        return None
+
     type = to_decimal(raw[3:6])
 
-    print(version, type)
     if type == 4:
-        val = parse_val(raw[6:])
-        return Value(version, val)
-
+        return parse_val(raw)
     else:
-        subpackets = parse_operator(raw)
-
-        return Operator(version, subpackets)
+        return parse_operator(raw)
 
 data = utils.get_day(2021, 16)[0]
 
-test_1 = parse(to_binary('D2FE28'))
+test_1, _ = parse(to_binary('D2FE28'))
 assert test_1.value == 2021
 
-test_2 = parse(to_binary('38006F45291200'))
+test_2, _ = parse(to_binary('38006F45291200'))
+print(test_2)
