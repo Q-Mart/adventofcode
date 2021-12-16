@@ -25,7 +25,7 @@ class Value(Packet):
         return self._value
 
     def __str__(self):
-        return str(self.value)
+        return f'Value(version={self._version}, val={self._value})'
 
 class Operator(Packet):
     def __init__(self, version, subpackets):
@@ -37,28 +37,26 @@ class Operator(Packet):
         for packet in self._subpackets:
             string += str(packet) + ','
 
-        string = string[:-2]
+        string = string[:-1]
         string += '])'
         return string
 
 def parse_val(raw):
-    version = int(raw[:3])
+    version = to_decimal(raw[:3])
     raw = raw[6:]
 
-    i = 0
+    extension = True
     value_str = ''
-    while i < len(raw) - 5:
-        extension = bool(int(raw[i]))
-        value_str += raw[i+1:i+5]
+    while extension == True:
+        extension = bool(int(raw[0]))
+        raw = raw[1:]
+        value_str += raw[:4]
+        raw = raw[4:]
 
-        i += 5
-        if extension == False:
-            break
-
-    return Value(version=version, val=to_decimal(value_str)), raw[i:]
+    return Value(version=version, val=to_decimal(value_str)), raw
 
 def parse_operator(raw):
-    version = int(raw[:3])
+    version = to_decimal(raw[:3])
     raw = raw[6:]
 
     length_type = int(raw[0])
@@ -76,6 +74,7 @@ def parse_operator(raw):
         while r != None:
             new_sub, remainder = r
             subpackets.append(new_sub)
+            print(new_sub, remainder)
             r = parse(remainder)
 
     else:
@@ -103,4 +102,4 @@ test_1, _ = parse(to_binary('D2FE28'))
 assert test_1.value == 2021
 
 test_2, _ = parse(to_binary('38006F45291200'))
-print(test_2)
+expected_2 = Operator(version=1, subpackets=[Value(version=6, val=10), Value(version=2, val=20)])
