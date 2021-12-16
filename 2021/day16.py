@@ -62,12 +62,12 @@ def parse_operator(raw):
     length_type = int(raw[0])
     raw = raw[1:]
 
+    subpackets = []
     print(f'length_type: {length_type}')
     if length_type == 0:
         length = to_decimal(raw[:15])
         raw = raw[15:]
 
-        subpackets = []
         to_parse = raw[:length]
 
         r = parse(to_parse)
@@ -77,11 +77,15 @@ def parse_operator(raw):
             print(new_sub, remainder)
             r = parse(remainder)
 
-    else:
-        print('NOT IMPLEMENTED')
-        return
+        raw = raw[length:]
 
-    print(f'length: {length}')
+    else:
+        num_subpackets = to_decimal(raw[:11])
+        raw = raw[11:]
+
+        for _ in range(num_subpackets):
+            new_sub, raw = parse(raw)
+            subpackets.append(new_sub)
 
     return Operator(version, subpackets), raw
 
@@ -96,6 +100,10 @@ def parse(raw):
     else:
         return parse_operator(raw)
 
+def sum_version_numbers(token, current_sum=0):
+    if type(token) == Value:
+        return current_sum + token.val
+
 data = utils.get_day(2021, 16)[0]
 
 test_1, _ = parse(to_binary('D2FE28'))
@@ -103,3 +111,6 @@ assert test_1.value == 2021
 
 test_2, _ = parse(to_binary('38006F45291200'))
 expected_2 = Operator(version=1, subpackets=[Value(version=6, val=10), Value(version=2, val=20)])
+
+test_3, _ = parse(to_binary('EE00D40C823060'))
+expected_3 = Operator(version=7, subpackets=[Value(version=2, val=1), Value(version=4, val=2), Value(version=1, val=3)])
