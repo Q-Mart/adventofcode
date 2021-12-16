@@ -64,7 +64,7 @@ def parse_operator(raw):
     print(f'length: {length}')
 
     sub_packets = parse(raw[ptr:ptr+length])
-    return sub_packets, ptr+length
+    return sub_packets
 
 def parse(raw):
     version = to_decimal(raw[:3])
@@ -76,12 +76,7 @@ def parse(raw):
         return Value(version, val)
 
     else:
-        packets = []
-        ptr = 0
-
-        while ptr <= len(raw):
-            sub_packets, ptr = parse_operator(raw[ptr:])
-            packets.append(Operator(version, sub_packets))
+        sub_packets, ptr = parse_operator(raw)
 
         return packets
 
@@ -90,6 +85,4 @@ data = utils.get_day(2021, 16)[0]
 test_1 = parse(to_binary('D2FE28'))
 assert test_1.value == 2021
 
-binary = to_binary('38006F45291200')
-print(f'bin {binary}')
 test_2 = parse(to_binary('38006F45291200'))
