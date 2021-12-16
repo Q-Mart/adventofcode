@@ -1,7 +1,8 @@
 import utils
 
 def to_binary(num: str) -> str:
-    return bin(int(num,16))[2:]
+    num_nibbles = len(num) * 4
+    return (bin(int(num,16))[2:]).zfill(num_nibbles)
 
 def to_decimal(string: str) -> int:
     return int(string, 2)
@@ -49,13 +50,18 @@ def parse_operator(raw):
     length_type = int(raw[ptr])
     ptr += 1
 
+    print(f'length_type: {length_type}')
     length = None
     if length_type == 0:
+        print(ptr, ptr+15)
+        print(raw[ptr:ptr+15])
         length = to_decimal(raw[ptr:ptr+15])
         ptr += 15
     else:
         length = to_decimal(raw[ptr:ptr+11])
         ptr += 11
+
+    print(f'length: {length}')
 
     sub_packets = parse(raw[ptr:ptr+length])
     return sub_packets, ptr+length
@@ -84,4 +90,6 @@ data = utils.get_day(2021, 16)[0]
 test_1 = parse(to_binary('D2FE28'))
 assert test_1.value == 2021
 
+binary = to_binary('38006F45291200')
+print(f'bin {binary}')
 test_2 = parse(to_binary('38006F45291200'))
