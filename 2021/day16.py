@@ -169,3 +169,12 @@ assert parse_and_sum_version_numbers('A0016C880162017C3686B18A3D4780') == 31
 utils.print_part_1(parse_and_sum_version_numbers(data))
 
 assert parse_and_eval('C200B40A82') == 3
+assert parse_and_eval('04005AC33890') == 54
+assert parse_and_eval('880086C3E88112') == 7
+assert parse_and_eval('CE00C43D881120') == 9
+assert parse_and_eval('D8005AC2A8F0') == 1
+assert parse_and_eval('F600BC2D8F') == 0
+assert parse_and_eval('9C005AC2F8F0') == 0
+assert parse_and_eval('9C0141080250320F1802104A08') == 1
+
+utils.print_part_2(parse_and_eval(data))
