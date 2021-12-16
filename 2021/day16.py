@@ -32,6 +32,10 @@ class Operator(Packet):
         super().__init__(version)
         self._subpackets = subpackets
 
+    @property
+    def subpackets(self):
+        return self._subpackets
+
     def __repr__(self):
         string = f'Operator(version={self._version}, subpackets=['
         for packet in self._subpackets:
@@ -63,7 +67,6 @@ def parse_operator(raw):
     raw = raw[1:]
 
     subpackets = []
-    print(f'length_type: {length_type}')
     if length_type == 0:
         length = to_decimal(raw[:15])
         raw = raw[15:]
@@ -74,7 +77,6 @@ def parse_operator(raw):
         while r != None:
             new_sub, remainder = r
             subpackets.append(new_sub)
-            print(new_sub, remainder)
             r = parse(remainder)
 
         raw = raw[length:]
@@ -100,9 +102,20 @@ def parse(raw):
     else:
         return parse_operator(raw)
 
-def sum_version_numbers(token, current_sum=0):
+def sum_version_numbers(token):
     if type(token) == Value:
-        return current_sum + token.val
+        return token.version
+    else:
+        current_sum = token.version
+        for packet in token.subpackets:
+            current_sum += sum_version_numbers(packet)
+
+        return current_sum
+
+def parse_and_sum_version_numbers(raw):
+    tokens, _ = parse(to_binary(raw))
+    s = sum_version_numbers(tokens)
+    return s
 
 data = utils.get_day(2021, 16)[0]
 
@@ -114,3 +127,8 @@ expected_2 = Operator(version=1, subpackets=[Value(version=6, val=10), Value(ver
 
 test_3, _ = parse(to_binary('EE00D40C823060'))
 expected_3 = Operator(version=7, subpackets=[Value(version=2, val=1), Value(version=4, val=2), Value(version=1, val=3)])
+
+assert parse_and_sum_version_numbers('8A004A801A8002F478') == 16
+assert parse_and_sum_version_numbers('620080001611562C8802118E34') == 12
+assert parse_and_sum_version_numbers('C0015000016115A2E0802F182340') == 23
+assert parse_and_sum_version_numbers('A0016C880162017C3686B18A3D4780') == 31
