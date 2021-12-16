@@ -43,7 +43,13 @@ def parse_val(raw):
         if extension == False:
             break
 
-    return to_decimal(value_str)
+    return to_decimal(value_str), raw[i:]
+
+def parse_subpackets_by_len(raw):
+    ptr = 0
+    subpackets = []
+
+    return subpackets
 
 def parse_operator(raw):
     ptr = 6
@@ -52,19 +58,21 @@ def parse_operator(raw):
 
     print(f'length_type: {length_type}')
     length = None
+    num_subpackets = None
     if length_type == 0:
         print(ptr, ptr+15)
         print(raw[ptr:ptr+15])
         length = to_decimal(raw[ptr:ptr+15])
         ptr += 15
+        subpackets = parse_subpackets_by_len()(raw[ptr:ptr+length])
     else:
-        length = to_decimal(raw[ptr:ptr+11])
+        num_subpackets = to_decimal(raw[ptr:ptr+11])
         ptr += 11
+        return
 
     print(f'length: {length}')
 
-    sub_packets = parse(raw[ptr:ptr+length])
-    return sub_packets
+    return subpackets
 
 def parse(raw):
     version = to_decimal(raw[:3])
@@ -76,9 +84,9 @@ def parse(raw):
         return Value(version, val)
 
     else:
-        sub_packets, ptr = parse_operator(raw)
+        subpackets = parse_operator(raw)
 
-        return packets
+        return Operator(version, subpackets)
 
 data = utils.get_day(2021, 16)[0]
 
