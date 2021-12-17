@@ -41,7 +41,7 @@ class Probe:
 
     def past_target(self):
         past_x = self._x > self._target.x2
-        past_y = self._y < self._target.y2
+        past_y = self._y < self._target.y1
         return past_x or past_y
 
     @property
@@ -69,9 +69,9 @@ def parse_input(data):
 def max_y_for_zone(z: Zone):
     max_y = 0
 
-    y_step = range(z.y2*1000)
+    y_step = range(z.y2*10)
     if z.y2 < 0:
-        y_step = range(0, -(z.y2*1000))
+        y_step = range(0, -(z.y2)*10)
 
     x_step = range(z.x2)
     if z.x2 < 0:
@@ -90,8 +90,11 @@ def max_y_for_zone(z: Zone):
 
     return max_y
 
-data = utils.get_day(2021, 17)
+data = utils.get_day(2021, 17)[0]
 
 test = 'target area: x=20..30, y=-10..-5'
 test_zone = parse_input(test)
-print(max_y_for_zone(test_zone))
+assert max_y_for_zone(test_zone) == 45
+
+zone = parse_input(data)
+utils.print_part_1(max_y_for_zone(zone))
