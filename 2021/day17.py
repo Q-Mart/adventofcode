@@ -69,9 +69,9 @@ def parse_input(data):
 def max_y_for_zone(z: Zone):
     max_y = 0
 
-    y_step = range(z.y2*10)
+    y_step = range(z.y1*2)
     if z.y2 < 0:
-        y_step = range(0, -(z.y2)*10)
+        y_step = range(0, -(z.y1)*2)
 
     x_step = range(z.x2)
     if z.x2 < 0:
@@ -90,6 +90,29 @@ def max_y_for_zone(z: Zone):
 
     return max_y
 
+def num_velocities_that_pass_zone(z: Zone):
+    num_velocities = 0
+
+    y_step = range(-z.y1, (z.y1*2)+1)
+    if z.y1 < 0:
+        y_step = range(z.y1, (-z.y1*2)+1)
+
+    x_step = range(z.x2+1)
+    if z.x2 < 0:
+        x_step = range(0, z.x2-1, -1)
+
+    for vy in y_step:
+        for vx in x_step:
+            p = Probe(vx, vy, z)
+
+            while not p.past_target():
+                p.step()
+
+            if p.hit_target:
+                num_velocities += 1
+
+    return num_velocities
+
 data = utils.get_day(2021, 17)[0]
 
 test = 'target area: x=20..30, y=-10..-5'
@@ -98,3 +121,6 @@ assert max_y_for_zone(test_zone) == 45
 
 zone = parse_input(data)
 utils.print_part_1(max_y_for_zone(zone))
+
+assert num_velocities_that_pass_zone(test_zone) == 112
+utils.print_part_2(num_velocities_that_pass_zone(zone))
