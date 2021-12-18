@@ -1,5 +1,6 @@
 import utils
 import math
+import copy
 
 class Node:
     def __init__(self, left, right):
@@ -124,7 +125,7 @@ def explode(tree, target, path_to_target):
 
     return tree
 
-def split_all_nodes(stack):
+def split_node(stack):
     def split(num):
         return Node(math.floor(num/2), math.ceil(num/2))
 
@@ -136,23 +137,48 @@ def split_all_nodes(stack):
     if type(t.left) == int and t.left >= 10:
         t.left = split(t.left)
         return True
-    else:
+    elif type(t.left) == Node:
         stack.append(t.left)
 
     if type(t.right) == int and t.right >= 10:
         t.right = split(t.right)
         return True
-    else:
+    elif type(t.right) == Node:
         stack.append(t.right)
+
+    split_node(stack)
 
 def add(t1, t2):
     return Node(t1, t2)
 
-def parse_to_tree(data):
-    if type(data) == int:
-        return data
-    else:
-        return Node(parse_to_tree(data[0]), parse_to_tree(data[1]))
+def keep_exploding(tree):
+    r = find_first_node_at_depth_4([(tree, '')])
+    while r != None:
+        target, path = r
+        explode(tree, target, path)
+        r = find_first_node_at_depth_4([(tree, '')])
+
+def keep_splitting(tree):
+    while split_node([tree]) == True:
+        pass
+
+def keep_exploding_and_splitting(tree):
+    no_change = False
+    while not no_change:
+        before = copy.deepcopy(tree)
+
+        keep_exploding(tree)
+        keep_splitting(tree)
+
+        no_change = equal_trees(before, tree)
+
+def assert_keep_exploding_and_splitting(data, expected_data):
+    t = parse_to_tree(data)
+    expected_t = parse_to_tree(expected_data)
+
+    keep_exploding_and_splitting(t)
+
+    assert equal_trees(t, expected_t)
 
 def assert_explode(data, expected_data):
     t = parse_to_tree(data)
@@ -163,6 +189,12 @@ def assert_explode(data, expected_data):
     t = explode(t, target, path)
     assert equal_trees(t, expected_t)
 
+def parse_to_tree(data):
+    if type(data) == int:
+        return data
+    else:
+        return Node(parse_to_tree(data[0]), parse_to_tree(data[1]))
+
 data = utils.get_day(2021, 18)
 
 assert_explode([[[[[9,8],1],2],3],4], [[[[0,9],2],3],4])
@@ -170,3 +202,8 @@ assert_explode([7,[6,[5,[4,[3,2]]]]], [7,[6,[5,[7,0]]]])
 assert_explode([[6,[5,[4,[3,2]]]],1], [[6,[5,[7,0]]],3])
 assert_explode([[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]], [[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]])
 assert_explode([[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]], [[3,[2,[8,0]]],[9,[5,[7,0]]]])
+
+assert_keep_exploding_and_splitting(
+    [[[[[4,3],4],4],[7,[[8,4],9]]], [1,1]],
+    [[[[0,7],4],[[7,8],[6,0]]],[8,1]]
+)
