@@ -85,14 +85,30 @@ def explode(tree, target, path_to_target):
     if traverse_along_path(tree, leftmost_path[:-1]) == target:
         parent = traverse_along_path(tree, leftmost_path[:-2])
         parent.left = 0
-        parent.right = parent.right + target.right
+
+        if type(parent.right) == int:
+            parent.right = parent.right + target.right
+        else:
+            parent = parent.right
+            while type(parent.left) != int:
+                parent = parent.left
+
+            parent.left = parent.left + target.right
         return tree
 
     _, rightmost_path = leftmost(tree)
     if traverse_along_path(tree, rightmost_path[:-1]) == target:
         parent = traverse_along_path(tree, rightmost_path[:-2])
         parent.right = 0
-        parent.left = parent.left + target.left
+
+        if type(parent.left) == int:
+            parent.left = parent.left + target.left
+        else:
+            parent = parent.left
+            while type(parent.right) != int:
+                parent = parent.right
+
+            parent.right = parent.right + target.left
         return tree
 
     r = find_left_neighbour(tree, target, path_to_target)
@@ -172,6 +188,23 @@ def keep_exploding_and_splitting(tree):
 
         no_change = equal_trees(before, tree)
 
+def process_list(lst):
+    trees = [parse_to_tree(l) for l in lst]
+    tree = trees[0]
+    keep_exploding_and_splitting(tree)
+
+    for t2 in trees[1:]:
+        tree = add(tree, t2)
+        keep_exploding_and_splitting(tree)
+
+    return tree
+
+def parse_to_tree(data):
+    if type(data) == int:
+        return data
+    else:
+        return Node(parse_to_tree(data[0]), parse_to_tree(data[1]))
+
 def assert_keep_exploding_and_splitting(data, expected_data):
     t = parse_to_tree(data)
     expected_t = parse_to_tree(expected_data)
@@ -189,11 +222,10 @@ def assert_explode(data, expected_data):
     t = explode(t, target, path)
     assert equal_trees(t, expected_t)
 
-def parse_to_tree(data):
-    if type(data) == int:
-        return data
-    else:
-        return Node(parse_to_tree(data[0]), parse_to_tree(data[1]))
+def assert_process_list(l, expected_t):
+    t = process_list(l)
+    expected_t = parse_to_tree(expected_t)
+    assert equal_trees(t, expected_t)
 
 data = utils.get_day(2021, 18)
 
@@ -206,4 +238,16 @@ assert_explode([[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]], [[3,[2,[8,0]]],[9,[5,[7,0]]]])
 assert_keep_exploding_and_splitting(
     [[[[[4,3],4],4],[7,[[8,4],9]]], [1,1]],
     [[[[0,7],4],[[7,8],[6,0]]],[8,1]]
+)
+
+assert_process_list(
+    [
+        [1,1],
+        [2,2],
+        [3,3],
+        [4,4],
+        [5,5],
+        [6,6]
+    ],
+    [[[[5,0],[7,4]],[5,5]],[6,6]]
 )
