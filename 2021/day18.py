@@ -45,6 +45,9 @@ def rightmost(tree):
         return rightmost(tree.right)
 
 def find_left_neighbour(tree, target, path):
+    if path == '':
+        return None
+
     path_to_parent = path[:-1]
     parent = traverse_along_path(tree, path_to_parent)
 
@@ -57,9 +60,12 @@ def leftmost(tree):
     if type(tree) == int:
         return tree
     else:
-        return rightmost(tree.left)
+        return leftmost(tree.left)
 
 def find_right_neighbour(tree, target, path):
+    if path == '':
+        return None
+
     path_to_parent = path[:-1]
     parent = traverse_along_path(tree, path_to_parent)
 
@@ -68,16 +74,19 @@ def find_right_neighbour(tree, target, path):
     else:
         return find_right_neighbour(tree, parent, path_to_parent)
 
-
 def parse_to_tree(data):
     if type(data) == int:
         return data
     else:
         return Node(parse_to_tree(data[0]), parse_to_tree(data[1]))
 
+def part_1(data):
+    t = parse_to_tree(data)
+    target, path = find_first_node_at_depth_4([(t, '')])
+    print(find_left_neighbour(t, target, path))
+    print(find_right_neighbour(t, target, path))
+
 data = utils.get_day(2021, 18)
 
-t = parse_to_tree([[6,[5,[4,[3,2]]]],1])
-target, path = find_first_node_at_depth_4([(t, '')])
-print(find_left_neighbour(t, target, path))
-print(find_right_neighbour(t, target, path))
+# part_1([[6,[5,[4,[3,2]]]],1])
+part_1([[[[[9,8],1],2],3],4])
