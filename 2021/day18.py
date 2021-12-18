@@ -29,8 +29,45 @@ def find_first_node_at_depth_4(stack):
 
     return find_first_node_at_depth_4(stack)
 
-def find_left_neighbour(tree, path):
-    path = path[:-1]
+def traverse_along_path(tree, path):
+    if path == '':
+        return tree
+
+    if path[0] == 'l':
+        return traverse_along_path(tree.left, path[1:])
+    else:
+        return traverse_along_path(tree.right, path[1:])
+
+def rightmost(tree):
+    if type(tree) == int:
+        return tree
+    else:
+        return rightmost(tree.right)
+
+def find_left_neighbour(tree, target, path):
+    path_to_parent = path[:-1]
+    parent = traverse_along_path(tree, path_to_parent)
+
+    if parent.right == target:
+        return rightmost(parent.left)
+    else:
+        return find_left_neighbour(tree, parent, path_to_parent)
+
+def leftmost(tree):
+    if type(tree) == int:
+        return tree
+    else:
+        return rightmost(tree.left)
+
+def find_right_neighbour(tree, target, path):
+    path_to_parent = path[:-1]
+    parent = traverse_along_path(tree, path_to_parent)
+
+    if parent.left == target:
+        return leftmost(parent.right)
+    else:
+        return find_right_neighbour(tree, parent, path_to_parent)
+
 
 def parse_to_tree(data):
     if type(data) == int:
@@ -41,4 +78,6 @@ def parse_to_tree(data):
 data = utils.get_day(2021, 18)
 
 t = parse_to_tree([[6,[5,[4,[3,2]]]],1])
-print(find_first_node_at_depth_4([(t, '')]))
+target, path = find_first_node_at_depth_4([(t, '')])
+print(find_left_neighbour(t, target, path))
+print(find_right_neighbour(t, target, path))
