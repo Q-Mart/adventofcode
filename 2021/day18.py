@@ -9,9 +9,14 @@ class Node:
     def __repr__(self):
         return f'Node(l={self.left}, r={self.right})'
 
-    def __eq__(self, t2):
-        print(self, t2)
-        return self.left == t2.left and self.right == t2.right
+def equal_trees(t1, t2):
+    if type(t1) == type(t2):
+        if type(t1) == int:
+            return t1 == t2
+        else:
+            return equal_trees(t1.left, t2.left) and equal_trees(t1.right, t2.right)
+
+    return False
 
 def split(num):
     return Node(math.floor(num/2), math.ceil(num/2))
@@ -24,11 +29,11 @@ def find_first_node_at_depth_4(stack):
     if len(path) >= 4:
         return node, path
 
-    if type(node.left) == Node:
-        stack.append((node.left, path+'l'))
-
     if type(node.right) == Node:
         stack.append((node.right, path+'r'))
+
+    if type(node.left) == Node:
+        stack.append(((node.left, path+'l')))
 
     return find_first_node_at_depth_4(stack)
 
@@ -92,23 +97,27 @@ def explode(tree, target, path_to_target):
         parent.left = parent.left + target.left
         return tree
 
-    _, left_neighbour_path = find_left_neighbour(tree, target, path_to_target)
-    final_step_to_left_neighbour = left_neighbour_path[-1]
-    left_neighbour_parent = traverse_along_path(tree, left_neighbour_path[:-1])
+    r = find_left_neighbour(tree, target, path_to_target)
+    if r != None:
+        _, left_neighbour_path = r
+        final_step_to_left_neighbour = left_neighbour_path[-1]
+        left_neighbour_parent = traverse_along_path(tree, left_neighbour_path[:-1])
 
-    if final_step_to_left_neighbour == 'r':
-        left_neighbour_parent.right += target.left
-    else:
-        left_neighbour_parent.left += target.left
+        if final_step_to_left_neighbour == 'r':
+            left_neighbour_parent.right += target.left
+        else:
+            left_neighbour_parent.left += target.left
 
-    _, right_neighbour_path = find_right_neighbour(tree, target, path_to_target)
-    final_step_to_right_neighbour = right_neighbour_path[-1]
-    right_neighbour_parent = traverse_along_path(tree, right_neighbour_path[:-1])
+    r = find_right_neighbour(tree, target, path_to_target)
+    if r != None:
+        r, right_neighbour_path = r
+        final_step_to_right_neighbour = right_neighbour_path[-1]
+        right_neighbour_parent = traverse_along_path(tree, right_neighbour_path[:-1])
 
-    if final_step_to_right_neighbour == 'r':
-        right_neighbour_parent.right += target.right
-    else:
-        right_neighbour_parent.left += target.left
+        if final_step_to_right_neighbour == 'r':
+            right_neighbour_parent.right += target.right
+        else:
+            right_neighbour_parent.left += target.right
 
     parent = traverse_along_path(tree, path_to_target[:-1])
     if parent.left == target:
@@ -131,11 +140,12 @@ def assert_explode(data, expected_data):
     target, path = find_first_node_at_depth_4([(t, '')])
 
     t = explode(t, target, path)
-    # print(explode(t, target, path))
-    # print(expected_t)
-    assert t == expected_t
+    assert equal_trees(t, expected_t)
 
 data = utils.get_day(2021, 18)
 
 assert_explode([[[[[9,8],1],2],3],4], [[[[0,9],2],3],4])
-# assert_explode([[6,[5,[4,[3,2]]]],1], [[6,[5,[7,0]]],3])
+assert_explode([7,[6,[5,[4,[3,2]]]]], [7,[6,[5,[7,0]]]])
+assert_explode([[6,[5,[4,[3,2]]]],1], [[6,[5,[7,0]]],3])
+assert_explode([[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]], [[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]])
+assert_explode([[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]], [[3,[2,[8,0]]],[9,[5,[7,0]]]])
