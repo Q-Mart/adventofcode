@@ -2,7 +2,7 @@ import utils
 
 class Node:
     def __init__(self, left, right):
-        self.left = left,
+        self.left = left
         self.right = right
 
     # def explode_left(self, val=None):
@@ -20,8 +20,13 @@ class Node:
     def __repr__(self):
         return f'Node(l={self.left}, r={self.right})'
 
+def find_first_node_at_depth(tree, depth=4, current_depth=0):
+    if current_depth == depth:
+        return tree
+    else:
+        return find_first_node_at_depth(tree.left, depth, current_depth+1)
+
 def parse_to_tree(data):
-    print(data)
     if type(data) == int:
         return data
     else:
@@ -29,4 +34,5 @@ def parse_to_tree(data):
 
 data = utils.get_day(2021, 18)
 
-print(parse_to_tree([[[[[9,8],1],2],3],4]))
+t = parse_to_tree([[[[[9,8],1],2],3],4])
+print(find_first_node_at_depth(t))
