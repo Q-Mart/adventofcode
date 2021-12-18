@@ -6,48 +6,31 @@ class Node:
         self.left = left
         self.right = right
 
-    # def explode_left(self, val=None):
-    #     if val == None:
-    #         val = self.left
-
-    #     if self.parent == None:
-    #         return False
-    #     elif self.parent.left != self:
-    #         self.parent.left += val
-    #         return True
-    #     else:
-    #         return self.parent.explode_left(val)
-
     def __repr__(self):
         return f'Node(l={self.left}, r={self.right})'
 
 def split(num):
     return Node(math.floor(num/2), math.ceil(num/2))
 
-def traverse(tree, path=''):
-    if len(path) >= 4:
-        return tree, path
-
-    if type(tree.left) == list:
-        result = traverse(tree.left, path+'l')
-        if result != None:
-            return result
-
-    if type(tree.right) == list:
-        result = traverse(tree.right, path+'r')
-        if result != None:
-            return result
-
-    return None
-
-def find_first_node_at_depth(tree, depth=4, current_depth=0):
-    if current_depth == depth:
-        return tree
-    elif type(tree) == int:
-        # Can't go lower
+def find_first_node_at_depth_4(stack):
+    print(stack)
+    if stack == []:
         return None
-    else:
-        return find_first_node_at_depth(tree.left, depth, current_depth+1)
+
+    node, path = stack.pop()
+    if len(path) >= 4:
+        return node, path
+
+    if type(node.left) == Node:
+        stack.append((node.left, path+'l'))
+
+    if type(node.right) == Node:
+        stack.append((node.right, path+'r'))
+
+    return find_first_node_at_depth_4(stack)
+
+def find_left_neighbour(tree, path):
+    path = path[:-1]
 
 def parse_to_tree(data):
     if type(data) == int:
@@ -58,4 +41,4 @@ def parse_to_tree(data):
 data = utils.get_day(2021, 18)
 
 t = parse_to_tree([[6,[5,[4,[3,2]]]],1])
-print(traverse(t))
+print(find_first_node_at_depth_4([(t, '')]))
