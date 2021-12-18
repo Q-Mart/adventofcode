@@ -18,9 +18,6 @@ def equal_trees(t1, t2):
 
     return False
 
-def split(num):
-    return Node(math.floor(num/2), math.ceil(num/2))
-
 def find_first_node_at_depth_4(stack):
     if stack == []:
         return None
@@ -126,6 +123,30 @@ def explode(tree, target, path_to_target):
         parent.right = 0
 
     return tree
+
+def split_all_nodes(stack):
+    def split(num):
+        return Node(math.floor(num/2), math.ceil(num/2))
+
+    if stack == []:
+        return False
+
+    t = stack.pop()
+
+    if type(t.left) == int and t.left >= 10:
+        t.left = split(t.left)
+        return True
+    else:
+        stack.append(t.left)
+
+    if type(t.right) == int and t.right >= 10:
+        t.right = split(t.right)
+        return True
+    else:
+        stack.append(t.right)
+
+def add(t1, t2):
+    return Node(t1, t2)
 
 def parse_to_tree(data):
     if type(data) == int:
